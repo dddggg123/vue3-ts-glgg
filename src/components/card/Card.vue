@@ -7,6 +7,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+
 interface Props {
     node: CardNode
     isDock?: boolean
@@ -16,17 +17,15 @@ const props = defineProps<Props>();
 const { node } = props;
 
 // 加载图片资源
-const modulesFiles = import.meta.glob(`../../assets/icons/*.png`)
-// const IMG_MAP = Object.keys(modules);
-console.log(modulesFiles);
+const modulesFiles = import.meta.globEager('../../assets/icons/*.png');
+
 const imgMapObj = Object.keys(modulesFiles).reduce(
-    (acc: { [key: string]: any }, path: string) => {
+    (module: { [key: string]: any }, path: string) => {
         const moduleName = path.replace('../../assets/icons/', '').replace('.png', '');
-        acc[moduleName] = modulesFiles[path];
-        return acc
+        module[moduleName] = modulesFiles[path].default;
+        return module
     }, {} as Record<string, string>
 )
-console.log(imgMapObj);
 </script>
 
 <style lang="scss" scoped>
