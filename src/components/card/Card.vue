@@ -1,5 +1,6 @@
 <template>
-    <div class="card-container">
+    <div class="card-container"
+        :style="isDock ? {} : { position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px` }">
         <img class="card-img" :src="imgMapObj[node.type]" :alt="`${node.type}`">
         <!-- <img :src="'./../../assets/icons/caomei.png'"/> -->
     </div>
@@ -7,6 +8,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { CardNode, GameConfig } from "../../types/type";
 
 interface Props {
     node: CardNode
@@ -30,16 +32,19 @@ const imgMapObj = Object.keys(modulesFiles).reduce(
 
 <style lang="scss" scoped>
 .card-container {
-    width: 40px;
-    height: 40px;
-    background-color: #fff;
+    width: 60px;
+    height: 60px;
+    background-color: #f3ffd1;
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 3px #5d731a solid;
+    border-radius: 10px;
+    box-sizing: border-box;
 
     .card-img {
-        width: 30px;
-        height: 30px;
+        width: 50px;
+        height: 50px;
     }
 }
 </style>

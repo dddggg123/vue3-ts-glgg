@@ -1,3 +1,12 @@
+//  全局样式
+* {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  box-sizing: border-box;
+  outline: none;
+}
+
 body {
   height: 100%;
   width: 100%;
@@ -13,4 +22,22 @@ html {
   height: 100%;
   padding: 0;
   margin: 0;
+}
+
+.flex-c {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-l {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.flex-r {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
