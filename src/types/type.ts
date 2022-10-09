@@ -24,7 +24,7 @@ export type CardNode = {
 	column: number; // 列
 	top: number;
 	left: number;
-	state: number; // 是否可点击 0： 无状态  1： 可点击 2：已选 3：已消除
+	state: number; // 卡片四种状态  0： 无状态  1： 可点击 2：已选 3：已消除
 };
 
 export interface GameConfig {
