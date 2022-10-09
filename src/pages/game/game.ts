@@ -98,6 +98,7 @@ export function initGame(config: GameConfig): Game {
 		const width = containerWidth / 2;
 		const height = containerHeight / 2;
 
+        // 建立遮罩层关系
 		floorList.forEach((o, index) => {
 			indexSet.clear();
 			let i = 0;
