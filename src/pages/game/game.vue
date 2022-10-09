@@ -1,6 +1,6 @@
 <template>
     <div class="game-container">
-        <div class="game-content">
+        <div ref="screenRef" class="game-content">
             <div class="game-header-section flex-c">
                 <p class="game-title">果了个果</p>
             </div>
@@ -29,15 +29,17 @@
 import Card from '@/components/card/Card.vue';
 import type { CardNode, GameConfig } from "../../types/type";
 import initGame from './game';
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, onUnmounted } from 'vue';
 import Grass1 from '@/assets/icons/grass1.png';
 import Grass2 from '@/assets/icons/grass2.png';
 import { showSuccessAnimation } from '../../utils/util';
+import windowResize from '../../utils/resize';
 
 type grassObj = {
     url: string
 }
 
+const { screenRef, calcRate, windowDraw, unWindowDraw } = windowResize()
 const containerRef = ref<HTMLElement | undefined>()
 const state = reactive({
     grassList: [
@@ -112,8 +114,15 @@ const {
 })
 
 onMounted(() => {
+    // 监听浏览器窗口尺寸变化
+    windowDraw()
+    calcRate()
     initGrassList();
     initCardList();
+})
+
+onUnmounted(() => {
+    unWindowDraw();
 })
 
 const initGrassList = () => {

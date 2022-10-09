@@ -1,12 +1,12 @@
 <template>
     <div class="welcome-container">
-        <div class="welcome-content">
+        <div ref="screenRef" class="welcome-content">
             <div class="welcome-header-section flex-c">
                 <p class="welcome-title">果了个果</p>
                 <img class="welcome-img1" src="@/assets/icons/caomei.png" alt="" />
                 <img class="welcome-img2" src="@/assets/icons/yangtao.png" alt="" />
                 <img class="welcome-img3" src="@/assets/icons/lizi.png" alt="" />
-                <img class="welcome-img4" src="@/assets/icons/pingguo.png" alt="" />
+                <img class="welcome-img4" src="@/assets/icons/putao.png" alt="" />
             </div>
             <div class="welcome-content-section">
                 <div class="animate-section">
@@ -24,8 +24,11 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import windowResize from '../../utils/resize';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const router = useRouter();
+const { screenRef, calcRate, windowDraw, unWindowDraw } = windowResize()
 
 const cardImgArr: Array<string> = [
     "boluo",
@@ -66,6 +69,16 @@ const imgMapObj = Object.keys(modulesFiles).reduce(
 const startGameAction = () => {
     router.push('/game');
 }
+
+onMounted(() => {
+    // 监听浏览器窗口尺寸变化
+    windowDraw()
+    calcRate()
+})
+
+onUnmounted(() => {
+    unWindowDraw();
+})
 
 </script>
 
@@ -135,7 +148,7 @@ const startGameAction = () => {
                 justify-content: center;
                 align-items: center;
                 flex-wrap: wrap;
-                padding: 100px 0;
+                padding: 10% 0;
 
                 .animate-img {
                     width: 80px;
