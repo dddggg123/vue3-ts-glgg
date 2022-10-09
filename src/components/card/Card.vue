@@ -1,6 +1,8 @@
 <template>
-    <div class="card-container" @click="cardTapAction"
-        :style="isDock ? {} : { position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px` }">
+    <div class="card-container"
+        :style="{ position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px` }"
+        @click="cardTapAction"
+    >
         <img class="card-img" :src="imgMapObj[node.type]" :alt="`${node.type}`">
         <!-- <img :src="'./../../assets/icons/caomei.png'"/> -->
         <div v-if="isForbid" class="card-mask"></div>
