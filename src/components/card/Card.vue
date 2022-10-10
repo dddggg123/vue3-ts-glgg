@@ -1,9 +1,7 @@
 <template>
-    <div class="card-container"
-        :class="{'card-dock': isDock}"
+    <div class="card-container" :class="{'card-dock': isDock}"
         :style="isDock?{}:{ position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px` }"
-        @click="cardTapAction"
-    >
+        @click="cardTapAction">
         <img class="card-img" :src="imgMapObj[node.type]" :alt="`${node.type}`">
         <!-- <img :src="'./../../assets/icons/caomei.png'"/> -->
         <div v-if="isForbid" class="card-mask"></div>
@@ -43,6 +41,14 @@ const cardTapAction = () => {
     if (isForbid.value) return;
     emit('cardTap', node);
 }
+
+const px2rem = (px: string) => {
+    if (/%/ig.test(px)) { // 有百分号%，特殊处理，表述pc是一个有百分号的数，比如：90%
+        return px
+    } else {
+        return (parseFloat(px) / 17) + 'rem' // 这里的37.5，和rootValue值对应
+    }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -81,20 +87,20 @@ const cardTapAction = () => {
 
 @keyframes shake {
 
-0% {
-    transform: scale(1);
-}
+    0% {
+        transform: scale(1);
+    }
 
-25% {
-    transform: scale(1.1);
-}
+    25% {
+        transform: scale(1.1);
+    }
 
-50% {
-    transform: scale(1.2);
-}
+    50% {
+        transform: scale(1.2);
+    }
 
-75% {
-    transform: scale(1.1);
-}
+    75% {
+        transform: scale(1.1);
+    }
 }
 </style>

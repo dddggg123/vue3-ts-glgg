@@ -7,6 +7,16 @@
                 <img class="welcome-img2" src="@/assets/icons/yangtao.png" alt="" />
                 <img class="welcome-img3" src="@/assets/icons/lizi.png" alt="" />
                 <img class="welcome-img4" src="@/assets/icons/putao.png" alt="" />
+                <div @click="startMusicHandler" class="music-section">
+                    <template v-if="musicEnable">
+                        <img class="music-img-open" src="@/assets/icons/music_s.png" alt="">
+                        <span class="music-title-open">关闭音乐</span>
+                    </template>
+                    <template v-else>
+                        <img class="music-img" src="@/assets/icons/music.png" alt="">
+                        <span class="music-title">开启音乐</span>
+                    </template>
+                </div>
             </div>
             <div class="welcome-content-section">
                 <div class="animate-section">
@@ -19,17 +29,20 @@
                 </div>
             </div>
         </div>
+        <audio @ended="audioEndedHandler" style="display: none" ref="welcomeAudioRef" preload="auto" controls>
+            <source src="@/assets/audios/welcome.mp3" />
+        </audio>
     </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import windowResize from '../../utils/resize';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, nextTick } from 'vue';
 
 const router = useRouter();
 const { screenRef, calcRate, windowDraw, unWindowDraw } = windowResize()
-
+const welcomeAudioRef = ref();
 const cardImgArr: Array<string> = [
     "boluo",
     "caomei",
@@ -53,6 +66,7 @@ const cardImgArr: Array<string> = [
     "yangtao",
     "yezi",
 ];
+const musicEnable = ref(false);
 
 // 加载图片资源
 const modulesFiles = import.meta.globEager('../../assets/icons/*.png');
@@ -68,6 +82,19 @@ const imgMapObj = Object.keys(modulesFiles).reduce(
 
 const startGameAction = () => {
     router.push('/game');
+}
+
+const startMusicHandler = () => {
+    musicEnable.value = !musicEnable.value;
+    if (musicEnable.value) {
+        welcomeAudioRef.value.play();
+    } else {
+        welcomeAudioRef.value.pause();
+    }
+}
+
+const audioEndedHandler = () => {
+    welcomeAudioRef.value.play();
 }
 
 onMounted(() => {
@@ -97,6 +124,55 @@ onUnmounted(() => {
             height: 100px;
             display: flex;
             position: relative;
+
+            .music-section {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+
+                .music-img {
+                    width: 25px;
+                    height: 25px;
+                }
+
+                .music-title {
+                    font-size: 12px;
+                    color: #8a8a8a;
+                    margin-top: 5px;
+                }
+
+                .music-img-open {
+                    width: 25px;
+                    height: 25px;
+                    animation: rotate 3s linear infinite;
+                }
+
+                @keyframes rotate {
+                    0% {
+                        transform: rotateZ(0deg);
+                    }
+
+                    50% {
+                        transform: rotateZ(180deg);
+                    }
+
+
+                    100% {
+                        transform: rotateZ(360deg);
+                    }
+                }
+
+                .music-title-open {
+                    font-size: 12px;
+                    color: #965a1c;
+                    margin-top: 5px;
+                }
+            }
 
             .welcome-title {
                 font-size: 70px;

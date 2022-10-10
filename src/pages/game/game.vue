@@ -2,7 +2,20 @@
     <div class="game-container">
         <div ref="screenRef" class="game-content">
             <div class="game-header-section flex-c">
-                <p class="game-title">果了个果</p>
+                <!-- <p class="game-title">果了个果</p> -->
+                <div class="date-section">
+                    <span class="date">{{state.currentDate}}</span>
+                </div>
+                <div @click="startMusicHandler" class="music-section">
+                    <template v-if="musicEnable">
+                        <img class="music-img-open" src="@/assets/icons/music_s.png" alt="">
+                        <span class="music-title-open">关闭音乐</span>
+                    </template>
+                    <template v-else>
+                        <img class="music-img" src="@/assets/icons/music.png" alt="">
+                        <span class="music-title">开启音乐</span>
+                    </template>
+                </div>
             </div>
             <div ref="containerRef" class="game-card-section">
                 <div v-for="(item, index) in state.grassList" :key="index" class="grass-item">
@@ -22,10 +35,21 @@
                 </div>
             </div>
         </div>
-        <audio ref="clickAudioRef" style="display: none;" controls src="@/assets/audios/click.mp3" />
-        <audio ref="dropAudioRef" style="display: none;" controls src="@/assets/audios/drop.mp3" />
-        <audio ref="winAudioRef" style="display: none;" controls src="@/assets/audios/win.mp3" />
-        <audio ref="loseAudioRef" style="display: none;" controls src="@/assets/audios/lose.mp3" />
+        <audio ref="clickAudioRef" style="display: none;" preload="auto" controls>
+            <source src="@/assets/audios/click.mp3" />
+        </audio>
+        <audio ref="dropAudioRef" style="display: none;" preload="auto" controls>
+            <source src="@/assets/audios/drop.mp3" />
+        </audio>
+        <audio ref="winAudioRef" style="display: none;" preload="auto" controls>
+            <source src="@/assets/audios/win.mp3" />
+        </audio>
+        <audio ref="loseAudioRef" style="display: none;" preload="auto" controls>
+            <source src="@/assets/audios/lose.mp3" />
+        </audio>
+        <audio @ended="audioEndedHandler" style="display: none" ref="gameAudioRef" preload="auto" controls>
+            <source src="@/assets/audios/game.mp3" />
+        </audio>
     </div>
 </template>
 
@@ -36,7 +60,7 @@ import initGame from './game';
 import { ref, onMounted, reactive, onUnmounted } from 'vue';
 import Grass1 from '@/assets/icons/grass1.png';
 import Grass2 from '@/assets/icons/grass2.png';
-import { showSuccessAnimation } from '../../utils/util';
+import { showSuccessAnimation, getCurrentDate } from '../../utils/util';
 import windowResize from '../../utils/resize';
 
 type grassObj = {
@@ -49,6 +73,7 @@ const clickAudioRef = ref<HTMLAudioElement | undefined>()
 const dropAudioRef = ref<HTMLAudioElement | undefined>()
 const winAudioRef = ref<HTMLAudioElement | undefined>()
 const loseAudioRef = ref<HTMLAudioElement | undefined>()
+const gameAudioRef = ref<HTMLAudioElement | undefined>()
 const state = reactive({
     grassList: [
     ] as Array<grassObj>,
@@ -65,13 +90,11 @@ const state = reactive({
             cardNum: 8,
             layerNum: 6,
             trap: false,
-        }, {
-            cardNum: 10,
-            layerNum: 7,
-            trap: false,
         }
-    ]
+    ],
+    currentDate: '- 10月10日 -'
 })
+const musicEnable = ref(false);
 
 const clickCardHandler = () => {
     if (clickAudioRef.value?.paused) {
@@ -104,6 +127,19 @@ const confirmCardVisible = (state: number): boolean => {
     return [0, 1].includes(state);
 }
 
+const audioEndedHandler = () => {
+
+}
+
+const startMusicHandler = () => {
+    musicEnable.value = !musicEnable.value;
+    if (musicEnable.value) {
+        gameAudioRef.value?.play();
+    } else {
+        gameAudioRef.value?.pause();
+    }
+}
+
 const {
     nodes,
     selectedNodes,
@@ -123,7 +159,7 @@ const {
         winCallback: winHandler,
         loseCallback: loseHandler,
     },
-    ...state.levelConfig[0]
+    ...state.levelConfig[2]
 })
 
 onMounted(() => {
@@ -132,6 +168,7 @@ onMounted(() => {
     calcRate()
     initGrassList();
     initCardList();
+    state.currentDate = '- ' + getCurrentDate() + ' -';
 })
 
 onUnmounted(() => {
@@ -139,7 +176,7 @@ onUnmounted(() => {
 })
 
 const initGrassList = () => {
-    for (let index = 0; index < 25; index++) {
+    for (let index = 0; index < 49; index++) {
         if (index % 2 == 0) {
             state.grassList.push({
                 url: Grass1
@@ -157,7 +194,17 @@ const initGrassList = () => {
 .game-container {
     background-color: #c3fe8b;
     height: 100%;
-    overflow: hidden;
+    overflow-y: auto;
+    /* 隐藏滚动条 */
+    scrollbar-width: none;
+    /* firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
+
+    &::-webkit-scrollbar {
+        display: none;
+        /* Chrome Safari */
+    }
 
     .game-content {
         width: 500px;
@@ -165,8 +212,68 @@ const initGrassList = () => {
         margin: 0 auto;
 
         .game-header-section {
-            height: 100px;
-            display: flex;
+            height: 60px;
+            position: relative;
+
+            .date-section {
+                background-color: #010303;
+                padding: 5px 10px;
+                border-radius: 5px;
+
+                .date {
+                    color: #fff;
+                    font-size: 20px;
+                }
+            }
+
+            .music-section {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+
+                .music-img {
+                    width: 25px;
+                    height: 25px;
+                }
+
+                .music-title {
+                    font-size: 12px;
+                    color: #8a8a8a;
+                    margin-top: 5px;
+                }
+
+                .music-img-open {
+                    width: 25px;
+                    height: 25px;
+                    animation: rotate 3s linear infinite;
+                }
+
+                @keyframes rotate {
+                    0% {
+                        transform: rotateZ(0deg);
+                    }
+
+                    50% {
+                        transform: rotateZ(180deg);
+                    }
+
+
+                    100% {
+                        transform: rotateZ(360deg);
+                    }
+                }
+
+                .music-title-open {
+                    font-size: 12px;
+                    color: #965a1c;
+                    margin-top: 5px;
+                }
+            }
 
             .game-title {
                 font-size: 44px;
@@ -175,13 +282,14 @@ const initGrassList = () => {
         }
 
         .game-card-section {
-            height: 70%;
+            height: 75%;
+            min-height: 640px;
             position: relative;
             display: grid;
             /* 指定每一行的宽度 每个宽度中间用空格隔开 */
-            grid-template-rows: 20% 20% 20% 20% 20%;
+            grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
             /* 指定每一列的宽度 每个宽度中间用空格隔开 */
-            grid-template-columns: 20% 20% 20% 20% 20%;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 
             .grass-item {
                 position: relative;
@@ -240,7 +348,7 @@ const initGrassList = () => {
         }
 
         .game-store-section {
-            height: calc(30% - 100px);
+            height: calc(25% - 60px);
 
             .game-store-content {
                 box-sizing: content-box;

@@ -93,7 +93,7 @@ export default function initGame(config: GameConfig): Game {
             len += floorNum;
             floorIndex++;
         }
-        const yOffset = 70; // y轴偏移量
+        const yOffset = 50; // y轴偏移量
         const containerWidth = container!.value!.clientWidth;
         const containerHeight = container!.value!.clientHeight;
         const width = containerWidth / 2;
