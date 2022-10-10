@@ -34,6 +34,8 @@
                     </template>
                 </div>
             </div>
+            <ModalSuccess :modal="successModal" @successModalTap="successModalTapHandler"></ModalSuccess>
+            <ModalFail :modal="failModal" @failModalTap="failModalTapHandler"></ModalFail>
         </div>
         <audio ref="clickAudioRef" style="display: none;" preload="auto" controls>
             <source src="@/assets/audios/click.mp3" />
@@ -55,6 +57,8 @@
 
 <script setup lang="ts">
 import Card from '@/components/card/Card.vue';
+import ModalSuccess from '@/components/modal/ModalSuccess.vue';
+import ModalFail from '@/components/modal/ModalFail.vue';
 import type { CardNode, GameConfig } from "../../types/type";
 import initGame from './game';
 import { ref, onMounted, reactive, onUnmounted } from 'vue';
@@ -62,11 +66,12 @@ import Grass1 from '@/assets/icons/grass1.png';
 import Grass2 from '@/assets/icons/grass2.png';
 import { showSuccessAnimation, getCurrentDate } from '../../utils/util';
 import windowResize from '../../utils/resize';
+import { useRouter } from 'vue-router';
 
 type grassObj = {
     url: string
 }
-
+const router = useRouter();
 const { screenRef, calcRate, windowDraw, unWindowDraw } = windowResize()
 const containerRef = ref<HTMLElement | undefined>()
 const clickAudioRef = ref<HTMLAudioElement | undefined>()
@@ -74,24 +79,28 @@ const dropAudioRef = ref<HTMLAudioElement | undefined>()
 const winAudioRef = ref<HTMLAudioElement | undefined>()
 const loseAudioRef = ref<HTMLAudioElement | undefined>()
 const gameAudioRef = ref<HTMLAudioElement | undefined>()
+const successModal = ref(false)
+const failModal = ref(false)
+
 const state = reactive({
     grassList: [
     ] as Array<grassObj>,
     levelConfig: [
         {
-            cardNum: 3,
+            cardNum: 4,
             layerNum: 2,
             trap: false,
         }, {
-            cardNum: 5,
+            cardNum: 8,
             layerNum: 4,
             trap: false,
         }, {
-            cardNum: 8,
+            cardNum: 12,
             layerNum: 6,
             trap: false,
         }
     ],
+    currentLevel: 0,
     currentDate: '- 10月10日 -'
 })
 const musicEnable = ref(false);
@@ -112,10 +121,14 @@ const dropCardHandler = () => {
 const winHandler = () => {
     console.log('胜利了');
     showSuccessAnimation();
+    winAudioRef.value?.play();
+    successModal.value = true;
 }
 
 const loseHandler = () => {
     console.log('失败了');
+    loseAudioRef.value?.play();
+    failModal.value = true;
 }
 
 const cardTapHandler = (card: CardNode) => {
@@ -128,7 +141,7 @@ const confirmCardVisible = (state: number): boolean => {
 }
 
 const audioEndedHandler = () => {
-
+    gameAudioRef.value?.play();
 }
 
 const startMusicHandler = () => {
@@ -138,6 +151,37 @@ const startMusicHandler = () => {
     } else {
         gameAudioRef.value?.pause();
     }
+}
+
+const successModalTapHandler = (type: string) => {
+    clickAudioRef.value?.play();
+    setTimeout(() => {
+        successModal.value = false;
+        switch (type) {
+            case 'next':
+                state.currentLevel += 1;
+                initCardList(state.levelConfig[state.currentLevel]);
+                break;
+            case 'back':
+                router.back();
+                break;
+        }
+    }, 300);
+}
+
+const failModalTapHandler = (type: string) => {
+    clickAudioRef.value?.play();
+    setTimeout(() => {
+        failModal.value = false;
+        switch (type) {
+            case 'restart':
+                initCardList(state.levelConfig[state.currentLevel]);
+                break;
+            case 'back':
+                router.back();
+                break;
+        }
+    }, 300);
 }
 
 const {
@@ -159,7 +203,7 @@ const {
         winCallback: winHandler,
         loseCallback: loseHandler,
     },
-    ...state.levelConfig[2]
+    ...state.levelConfig[state.currentLevel]
 })
 
 onMounted(() => {

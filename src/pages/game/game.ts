@@ -54,7 +54,7 @@ export default function initGame(config: GameConfig): Game {
     const size = 60;
     let floorList: number[][] = [];
 
-    const initCardList = () => {
+    const initCardList = (config?: GameConfig | null) => {
         const { cardNum, layerNum, trap } = { ...initConfig, ...config };
         histroyList.value = [];
         backFlag.value = false;
@@ -78,7 +78,7 @@ export default function initGame(config: GameConfig): Game {
             const len = itemList.length;
             itemList.splice(len - cardNum, len);
         }
-        console.log('卡牌列表:' + JSON.stringify(itemList));
+        // console.log('卡牌列表:' + JSON.stringify(itemList));
         // 打乱节点
         itemList = shuffle(shuffle(itemList));
 
@@ -134,7 +134,7 @@ export default function initGame(config: GameConfig): Game {
             nodes.value = nodes.value.concat(floorNodes);
             perFloorNodes = floorNodes;
         });
-        console.log('矩阵列表:' + JSON.stringify(floorList));
+        // console.log('矩阵列表:' + JSON.stringify(floorList));
         updateState();
     };
 
@@ -148,7 +148,7 @@ export default function initGame(config: GameConfig): Game {
      * card点击事件
      */
     const selectCardHandler = (card: CardNode) => {
-        console.log('我点击的节点:' + JSON.stringify(card));
+        // console.log('我点击的节点:' + JSON.stringify(card));
         if (selectedNodes.value.length === 7) return;
         card.state = 2
         histroyList.value.push(card)

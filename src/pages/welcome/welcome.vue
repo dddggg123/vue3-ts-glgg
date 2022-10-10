@@ -4,7 +4,7 @@
             <div class="welcome-header-section flex-c">
                 <p class="welcome-title">果了个果</p>
                 <img class="welcome-img1" src="@/assets/icons/caomei.png" alt="" />
-                <img class="welcome-img2" src="@/assets/icons/yangtao.png" alt="" />
+                <img class="welcome-img2" src="@/assets/icons/xigua.png" alt="" />
                 <img class="welcome-img3" src="@/assets/icons/lizi.png" alt="" />
                 <img class="welcome-img4" src="@/assets/icons/putao.png" alt="" />
                 <div @click="startMusicHandler" class="music-section">
@@ -32,17 +32,21 @@
         <audio @ended="audioEndedHandler" style="display: none" ref="welcomeAudioRef" preload="auto" controls>
             <source src="@/assets/audios/welcome.mp3" />
         </audio>
+        <audio ref="clickAudioRef" style="display: none;" preload="auto" controls>
+            <source src="@/assets/audios/click.mp3" />
+        </audio>
     </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import windowResize from '../../utils/resize';
-import { onMounted, onUnmounted, ref, nextTick } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const router = useRouter();
 const { screenRef, calcRate, windowDraw, unWindowDraw } = windowResize()
 const welcomeAudioRef = ref();
+const clickAudioRef = ref();
 const cardImgArr: Array<string> = [
     "boluo",
     "caomei",
@@ -81,7 +85,10 @@ const imgMapObj = Object.keys(modulesFiles).reduce(
 
 
 const startGameAction = () => {
-    router.push('/game');
+    clickAudioRef.value.play();
+    setTimeout(() => {
+        router.push('/game')
+    }, 300);
 }
 
 const startMusicHandler = () => {
@@ -176,7 +183,8 @@ onUnmounted(() => {
 
             .welcome-title {
                 font-size: 70px;
-                font-weight: bolder;
+                font-weight: bold;
+                -webkit-text-stroke: 3px #fff;
             }
 
             .welcome-img1 {
