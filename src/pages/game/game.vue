@@ -22,6 +22,10 @@
                 </div>
             </div>
         </div>
+        <audio ref="clickAudioRef" style="display: none;" controls src="@/assets/audios/click.mp3" />
+        <audio ref="dropAudioRef" style="display: none;" controls src="@/assets/audios/drop.mp3" />
+        <audio ref="winAudioRef" style="display: none;" controls src="@/assets/audios/win.mp3" />
+        <audio ref="loseAudioRef" style="display: none;" controls src="@/assets/audios/lose.mp3" />
     </div>
 </template>
 
@@ -41,6 +45,10 @@ type grassObj = {
 
 const { screenRef, calcRate, windowDraw, unWindowDraw } = windowResize()
 const containerRef = ref<HTMLElement | undefined>()
+const clickAudioRef = ref<HTMLAudioElement | undefined>()
+const dropAudioRef = ref<HTMLAudioElement | undefined>()
+const winAudioRef = ref<HTMLAudioElement | undefined>()
+const loseAudioRef = ref<HTMLAudioElement | undefined>()
 const state = reactive({
     grassList: [
     ] as Array<grassObj>,
@@ -65,20 +73,25 @@ const state = reactive({
     ]
 })
 
-const handleClickCard = () => {
-
+const clickCardHandler = () => {
+    if (clickAudioRef.value?.paused) {
+        clickAudioRef.value.play()
+    } else if (clickAudioRef.value) {
+        clickAudioRef.value.load()
+        clickAudioRef.value.play()
+    }
 }
 
-const handleDropCard = () => {
-
+const dropCardHandler = () => {
+    dropAudioRef.value?.play()
 }
 
-const handleWin = () => {
+const winHandler = () => {
     console.log('胜利了');
     showSuccessAnimation();
 }
 
-const handleLose = () => {
+const loseHandler = () => {
     console.log('失败了');
 }
 
@@ -105,10 +118,10 @@ const {
 } = initGame({
     container: containerRef,
     events: {
-        clickCallback: handleClickCard,
-        dropCallback: handleDropCard,
-        winCallback: handleWin,
-        loseCallback: handleLose,
+        clickCallback: clickCardHandler,
+        dropCallback: dropCardHandler,
+        winCallback: winHandler,
+        loseCallback: loseHandler,
     },
     ...state.levelConfig[0]
 })
