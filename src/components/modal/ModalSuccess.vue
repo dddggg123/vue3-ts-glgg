@@ -1,8 +1,8 @@
 <template>
     <div v-if="modal" class="modal-success-continer flex-c" :class="{'modal-show': modal}">
-        <p class="success-title">挑战成功</p>
+        <p class="success-title">{{isLast?'全部通关':'挑战成功'}}</p>
         <p @click="successModalAction('next')" class="next-btn flex-c">
-            <span>下一关</span>
+            <span>{{isLast?'重新开始':'下一关'}}</span>
         </p>
         <p @click="successModalAction('back')" class="back-btn flex-c">
             <span>返回果园</span>
@@ -13,6 +13,10 @@
 <script setup lang="ts">
 const props = defineProps({
     modal: {
+        type: Boolean,
+        default: false,
+    },
+    isLast: {
         type: Boolean,
         default: false,
     }

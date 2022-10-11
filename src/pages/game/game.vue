@@ -24,7 +24,7 @@
                 <template v-for="(item, index) in nodes" :key="item.id">
                     <!-- <Card v-if="item.state === 0 || item.state === 1"
                         @cardTap="selectCardHandler" :node="item"></Card> -->
-                    <Card :ref="(el) => {setNodeItemRef(el, item.id)}" v-if="item.state === 0 || item.state === 1"
+                    <Card :nodeIndex="index" :ref="(el) => {setNodeItemRef(el, item.id)}" v-if="item.state === 0 || item.state === 1"
                         @cardTap="selectCardHandler" :node="item"></Card>
                 </template>
             </div>
@@ -32,7 +32,7 @@
                 <div ref="storeRef" class="game-store-content flex-l">
                     <template v-if="selectedNodes.length">
                         <template v-for="(item, index) in selectedNodes" :key="item.id">
-                            <Card v-if="item.state === 2" :isDock="true" :node="item"></Card>
+                            <Card :nodeIndex="index" v-if="item.state === 2" :isDock="true" :node="item"></Card>
                         </template>
                     </template>
                     <template v-else>
@@ -52,7 +52,7 @@
                     </div>
                 </div>
             </div>
-            <ModalSuccess :modal="successModal" @successModalTap="successModalTapHandler"></ModalSuccess>
+            <ModalSuccess :isLast="state.currentLevel == state.levelConfig.length - 1" :modal="successModal" @successModalTap="successModalTapHandler"></ModalSuccess>
             <ModalFail :modal="failModal" @failModalTap="failModalTapHandler"></ModalFail>
         </div>
         <audio ref="clickAudioRef" style="display: none;" preload="auto" controls>
@@ -147,11 +147,11 @@ const state = reactive({
             layerNum: 2,
             trap: false,
         }, {
-            cardNum: 8,
+            cardNum: 6,
             layerNum: 4,
             trap: false,
         }, {
-            cardNum: 12,
+            cardNum: 8,
             layerNum: 6,
             trap: false,
         }
@@ -186,7 +186,8 @@ const confirmNodeStyle = (card: CardNode) => {
         }
     }
     if (nodeProxy) {
-        nodeProxy.$el.style = `position: absolute; z-index: ${card.zIndex}; top: ${storeItemPostionList.value[selectedNodes.value.length].top}px; left: ${storeItemPostionList.value[selectedNodes.value.length].left}px;`;
+        nodeProxy.$el.style = `position: absolute; z-index: ${card.zIndex}; top: ${storeItemPostionList.value[selectedNodes.value.length].top}px; left: ${storeItemPostionList.value[selectedNodes.value.length].left}px; opacity: 0;`;
+        // nodeProxy.$el.style = ''
     }
     // card = { ...card, ...{ top: storeItemPostionList.value[selectedNodes.value.length].top, left: storeItemPostionList.value[selectedNodes.value.length].left } }
 }
@@ -196,14 +197,12 @@ const dropCardHandler = () => {
 }
 
 const winHandler = () => {
-    console.log('胜利了');
     showSuccessAnimation();
     winAudioRef.value?.play();
     successModal.value = true;
 }
 
 const loseHandler = () => {
-    console.log('失败了');
     loseAudioRef.value?.play();
     failModal.value = true;
 }
@@ -233,7 +232,11 @@ const successModalTapHandler = (type: string) => {
         switch (type) {
             case 'next':
                 nodesRefs.value = [];
-                state.currentLevel += 1;
+                if (state.currentLevel === state.levelConfig.length - 1) {
+                    state.currentLevel = 0;
+                } else {
+                    state.currentLevel += 1;
+                }
                 initCardList(state.levelConfig[state.currentLevel]);
                 break;
             case 'back':
@@ -260,17 +263,14 @@ const failModalTapHandler = (type: string) => {
 }
 
 const calcStoreItemPostion = () => {
-    console.log(storeItemRefs);
     storeItemRefs.forEach(item => {
         let rect = item.getBoundingClientRect();
-        console.log(rect);
         let obj = {
             top: rect.top,
             left: rect.left - rect.width * 7
         }
         storeItemPostionList.value.push(obj);
     })
-    console.log('位置数组:' + JSON.stringify(storeItemPostionList.value));
 }
 
 const {

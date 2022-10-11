@@ -7,7 +7,7 @@
                 <img class="card-img" :src="imgMapObj[node.type]" :alt="`${node.type}`">
                 <!-- <img :src="'./../../assets/icons/caomei.png'"/> -->
             </div>
-            <div v-if="isForbid" class="card-mask"></div>
+            <div v-if="isForbid && !isDock" class="card-mask"></div>
         </div>
     </div>
 </template>
@@ -18,13 +18,14 @@ import type { CardNode, GameConfig } from "../../types/type";
 
 interface Props {
     node: CardNode
-    isDock?: boolean
+    isDock?: boolean,
+    nodeIndex: number
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(['cardTap']);
 
-const { node } = props;
+const { node, nodeIndex } = props;
 
 // 加载图片资源
 const modulesFiles = import.meta.globEager('../../assets/icons/*.png');
@@ -43,6 +44,7 @@ const isForbid = computed(() => {
 
 const cardTapAction = () => {
     if (isForbid.value) return;
+    node.nodeIndex = nodeIndex;
     emit('cardTap', node);
 }
 
@@ -62,7 +64,7 @@ const px2rem = (px: string) => {
     background-color: #5d731a;
     border-radius: 3px;
     cursor: pointer;
-    transition: all .3s ease-in-out;
+    transition: all .2s ease-in-out;
 
     .card-section {
         width: 100%;

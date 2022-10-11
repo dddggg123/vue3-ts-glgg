@@ -94,7 +94,7 @@ export default function initGame(config: GameConfig): Game {
             len += floorNum;
             floorIndex++;
         }
-        const yOffset = 50; // y轴偏移量
+        const yOffset = 20; // y轴偏移量
         const containerWidth = container!.value!.clientWidth;
         const containerHeight = container!.value!.clientHeight;
         const width = containerWidth / 2;
@@ -148,7 +148,7 @@ export default function initGame(config: GameConfig): Game {
         // 为了动画效果添加延迟
         setTimeout(() => {
             card.state = 2
-        }, 300);
+        }, 210);
         histroyList.value.push(card)
         preNode.value = card
         const index = nodes.value.findIndex(o => o.id === card.id)
@@ -160,6 +160,8 @@ export default function initGame(config: GameConfig): Game {
         events.clickCallback && events.clickCallback(card)
         if (selectedSomeNode.length === 2) {
             setTimeout(() => {
+                nodes.value[card.nodeIndex] = card;
+                // nodes.value = nodes.value.filter(s => s.state === 0 || s.state === 1)
                 // 第二个节点索引
                 const secondIndex = selectedNodes.value.findIndex(o => o.id === selectedSomeNode[1].id)
                 selectedNodes.value.splice(secondIndex + 1, 0, card)
@@ -175,9 +177,11 @@ export default function initGame(config: GameConfig): Game {
                 } else {
                     events.dropCallback && events.dropCallback()
                 }
-            }, 320)
+            }, 220)
         } else {
             setTimeout(() => {
+                nodes.value[card.nodeIndex] = card;
+                // nodes.value = nodes.value.filter(s => s.state === 0 || s.state === 1)
                 // card.state = 2
                 const index = selectedNodes.value.findIndex(o => o.type === card.type)
                 if (index > -1) {
@@ -191,7 +195,7 @@ export default function initGame(config: GameConfig): Game {
                     backFlag.value = true
                     events.loseCallback && events.loseCallback()
                 }
-            }, 320);
+            }, 220);
         }
     };
     /**
