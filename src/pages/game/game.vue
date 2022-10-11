@@ -187,7 +187,6 @@ const confirmNodeStyle = (card: CardNode) => {
     }
     if (nodeProxy) {
         nodeProxy.$el.style = `position: absolute; z-index: ${card.zIndex}; top: ${storeItemPostionList.value[selectedNodes.value.length].top}px; left: ${storeItemPostionList.value[selectedNodes.value.length].left}px; opacity: 0;`;
-        // nodeProxy.$el.style = ''
     }
     // card = { ...card, ...{ top: storeItemPostionList.value[selectedNodes.value.length].top, left: storeItemPostionList.value[selectedNodes.value.length].left } }
 }
@@ -267,7 +266,7 @@ const calcStoreItemPostion = () => {
         let rect = item.getBoundingClientRect();
         let obj = {
             top: rect.top,
-            left: rect.left - rect.width * 7
+            left: rect.left - rect.width * 12
         }
         storeItemPostionList.value.push(obj);
     })
