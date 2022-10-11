@@ -1,10 +1,14 @@
 <template>
-    <div class="card-container" :class="{'card-dock': isDock}"
+    <div class="card-container flex-c" :class="{'card-dock': isDock}"
         :style="isDock?{}:{ position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px` }"
         @click="cardTapAction">
-        <img class="card-img" :src="imgMapObj[node.type]" :alt="`${node.type}`">
-        <!-- <img :src="'./../../assets/icons/caomei.png'"/> -->
-        <div v-if="isForbid" class="card-mask"></div>
+        <div class="card-section flex-c">
+            <div class="card-content flex-c">
+                <img class="card-img" :src="imgMapObj[node.type]" :alt="`${node.type}`">
+                <!-- <img :src="'./../../assets/icons/caomei.png'"/> -->
+            </div>
+            <div v-if="isForbid" class="card-mask"></div>
+        </div>
     </div>
 </template>
 
@@ -55,29 +59,38 @@ const px2rem = (px: string) => {
 .card-container {
     width: 60px;
     height: 60px;
-    background-color: #f3ffd1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 3px #5d731a solid;
+    background-color: #5d731a;
     border-radius: 10px;
-    box-sizing: border-box;
-    overflow: hidden;
     cursor: pointer;
 
-    .card-img {
-        width: 50px;
-        height: 50px;
-    }
+    .card-section {
+        width: 100%;
+        height: 100%;
+        position: relative;
 
-    .card-mask {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 60px;
-        height: 60px;
-        background-color: rgba($color: #000000, $alpha: .6);
-        pointer-events: none;
+        .card-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            border-radius: 10px;
+            background-color: rgba($color: #000000, $alpha: .6);
+            pointer-events: none;
+            cursor: none;
+        }
+
+        .card-content {
+            width: 55px;
+            height: 55px;
+            border-radius: 10px;
+            background-color: #f3ffd1;
+
+            .card-img {
+                width: 50px;
+                height: 50px;
+            }
+        }
     }
 }
 
