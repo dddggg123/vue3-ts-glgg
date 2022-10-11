@@ -67,6 +67,7 @@ export default function initGame(config: GameConfig): Game {
         selectedNodes.value = [];
         floorList = [];
         const isTrap = trap && floor(random(0, 100)) !== 50;
+        let shuffleCardImgArr = shuffle(cardImgArr);
 
         // 生成节点池
         const itemTypes = new Array(cardNum).fill(0).map((_, index) => index + 1);
@@ -99,6 +100,7 @@ export default function initGame(config: GameConfig): Game {
         const width = containerWidth / 2;
         const height = containerHeight / 2 - yOffset;
 
+        let nodeArr = [];
         floorList.forEach((o, index) => {
             indexSet.clear();
             let i = 0;
@@ -110,7 +112,7 @@ export default function initGame(config: GameConfig): Game {
                 const column = index ? i % index : 0;
                 const node: CardNode = {
                     id: `${index}-${i}`,
-                    type: cardImgArr[k],
+                    type: shuffleCardImgArr[k],
                     zIndex: index,
                     index: i,
                     row,
@@ -122,26 +124,19 @@ export default function initGame(config: GameConfig): Game {
                 };
                 const xy = [node.top, node.left];
                 perFloorNodes.forEach((e) => {
-                    if (
-                        Math.abs(e.top - xy[0]) <= size &&
-                        Math.abs(e.left - xy[1]) <= size
-                    )
+                    if (Math.abs(e.top - xy[0]) <= size && Math.abs(e.left - xy[1]) <= size)
                         e.parents.push(node);
                 });
                 floorNodes.push(node);
                 indexSet.add(i);
             });
-            nodes.value = nodes.value.concat(floorNodes);
+            nodeArr = nodeArr.concat(floorNodes);
             perFloorNodes = floorNodes;
         });
-        // console.log('矩阵列表:' + JSON.stringify(floorList));
-        updateState();
-    };
-
-    const updateState = () => {
-        nodes.value.forEach((o) => {
+        nodeArr.forEach((o) => {
             o.state = o.parents.every((p) => p.state > 0) ? 1 : 0;
         });
+        nodes.value = nodeArr;
     };
 
     /**
@@ -150,7 +145,10 @@ export default function initGame(config: GameConfig): Game {
     const selectCardHandler = (card: CardNode) => {
         // console.log('我点击的节点:' + JSON.stringify(card));
         if (selectedNodes.value.length === 7) return;
-        // card.state = 2
+        // 为了动画效果添加延迟
+        setTimeout(() => {
+            card.state = 2
+        }, 300);
         histroyList.value.push(card)
         preNode.value = card
         const index = nodes.value.findIndex(o => o.id === card.id)
@@ -159,14 +157,13 @@ export default function initGame(config: GameConfig): Game {
         }
         // 判断是否有可以消除的节点
         const selectedSomeNode = selectedNodes.value.filter(s => s.type === card.type)
+        events.clickCallback && events.clickCallback(card)
         if (selectedSomeNode.length === 2) {
-            // 第二个节点索引
-            const secondIndex = selectedNodes.value.findIndex(o => o.id === selectedSomeNode[1].id)
-            selectedNodes.value.splice(secondIndex + 1, 0, card)
-            // 为了动画效果添加延迟
             setTimeout(() => {
+                // 第二个节点索引
+                const secondIndex = selectedNodes.value.findIndex(o => o.id === selectedSomeNode[1].id)
+                selectedNodes.value.splice(secondIndex + 1, 0, card)
                 for (let i = 0; i < 3; i++) {
-                    // const index = selectedNodes.value.findIndex(o => o.type === node.type)
                     selectedNodes.value.splice(secondIndex - 1, 1);
                 }
                 preNode.value = null
@@ -178,28 +175,30 @@ export default function initGame(config: GameConfig): Game {
                 } else {
                     events.dropCallback && events.dropCallback()
                 }
-            }, 100)
+            }, 320)
         } else {
-            events.clickCallback && events.clickCallback(card)
-            const index = selectedNodes.value.findIndex(o => o.type === card.type)
-            if (index > -1) {
-                selectedNodes.value.splice(index + 1, 0, card);
-            } else {
-                selectedNodes.value.push(card);
-            }
-            // 判断卡槽是否已满，即失败
-            if (selectedNodes.value.length === 7) {
-                removeFlag.value = true
-                backFlag.value = true
-                events.loseCallback && events.loseCallback()
-            }
+            setTimeout(() => {
+                // card.state = 2
+                const index = selectedNodes.value.findIndex(o => o.type === card.type)
+                if (index > -1) {
+                    selectedNodes.value.splice(index + 1, 0, card);
+                } else {
+                    selectedNodes.value.push(card);
+                }
+                // 判断卡槽是否已满，即失败
+                if (selectedNodes.value.length === 7) {
+                    removeFlag.value = true
+                    backFlag.value = true
+                    events.loseCallback && events.loseCallback()
+                }
+            }, 320);
         }
     };
     /**
      * card点击事件
      * 3个同类型的card移除事件
      */
-    const selectCardAndRemoveHandler = (node: CardNode) => { };
+    const shuffleCardListHandler = () => { };
     /**
      * 移出3个card事件
      */
@@ -218,7 +217,7 @@ export default function initGame(config: GameConfig): Game {
         selectCardHandler,
         rollbackOneCardHandler,
         removeThreeCardHandler,
-        selectCardAndRemoveHandler,
+        shuffleCardListHandler,
         initCardList,
     };
 }

@@ -22,15 +22,34 @@
                     <img :src="item.url" class="grass-img">
                 </div>
                 <template v-for="(item, index) in nodes" :key="item.id">
-                    <Card :node-index="index" :ref="setNodeItemRef" v-if="confirmCardVisible(item.state)" @cardTap="selectCardHandler"
-                        :node="item"></Card>
+                    <!-- <Card v-if="item.state === 0 || item.state === 1"
+                        @cardTap="selectCardHandler" :node="item"></Card> -->
+                    <Card :ref="(el) => {setNodeItemRef(el, item.id)}" v-if="item.state === 0 || item.state === 1"
+                        @cardTap="selectCardHandler" :node="item"></Card>
                 </template>
             </div>
-            <div class="game-store-section flex-c">
-                <div class="game-store-content flex-l">
-                    <template v-for="(item, index) in selectedNodes" :key="item.id">
-                        <Card :node-index="index" v-if="item.state === 2" :isDock="true" :node="item"></Card>
+            <div class="game-store-section">
+                <div ref="storeRef" class="game-store-content flex-l">
+                    <template v-if="selectedNodes.length">
+                        <template v-for="(item, index) in selectedNodes" :key="item.id">
+                            <Card v-if="item.state === 2" :isDock="true" :node="item"></Card>
+                        </template>
                     </template>
+                    <template v-else>
+                        <div :ref="setStoreItemRefs" class="store-item" :key="item"
+                            v-for="item in [1, 2, 3, 4, 5, 6, 7]"></div>
+                    </template>
+                </div>
+                <div class="btn-section">
+                    <div @click="removeThreeCardHandler" class="btn-item flex-c">
+                        <span class="btn-title">移出</span>
+                    </div>
+                    <div @click="rollbackOneCardHandler" class="btn-item flex-c">
+                        <span class="btn-title">回退</span>
+                    </div>
+                    <div @click="shuffleCardListHandler" class="btn-item flex-c">
+                        <span class="btn-title">打乱</span>
+                    </div>
                 </div>
             </div>
             <ModalSuccess :modal="successModal" @successModalTap="successModalTapHandler"></ModalSuccess>
@@ -60,7 +79,7 @@ import ModalSuccess from '@/components/modal/ModalSuccess.vue';
 import ModalFail from '@/components/modal/ModalFail.vue';
 import type { CardNode, GameConfig } from "../../types/type";
 import initGame from './game';
-import { ref, onMounted, reactive, onUnmounted } from 'vue';
+import { ref, onMounted, reactive, onUnmounted, nextTick, ComponentPublicInstance, HTMLAttributes } from 'vue';
 import Grass1 from '@/assets/icons/grass1.png';
 import Grass2 from '@/assets/icons/grass2.png';
 import { showSuccessAnimation, getCurrentDate } from '../../utils/util';
@@ -70,9 +89,16 @@ import { useRouter } from 'vue-router';
 type grassObj = {
     url: string
 }
+
+type positionObj = {
+    top: number,
+    left: number
+}
+
 const router = useRouter();
 const { screenRef, calcRate, windowDraw, unWindowDraw } = windowResize()
 const containerRef = ref<HTMLElement | undefined>()
+const storeRef = ref<HTMLElement | undefined>()
 const clickAudioRef = ref<HTMLAudioElement | undefined>()
 const dropAudioRef = ref<HTMLAudioElement | undefined>()
 const winAudioRef = ref<HTMLAudioElement | undefined>()
@@ -80,16 +106,29 @@ const loseAudioRef = ref<HTMLAudioElement | undefined>()
 const gameAudioRef = ref<HTMLAudioElement | undefined>()
 const successModal = ref(false)
 const failModal = ref(false)
+const storeItemPostionList = ref([] as Array<positionObj>)
 
 /**
  * 卡片对应html元素数组
 */
-let nodesRefs: any[] = [];
+const nodesRefs = ref<any>([]);
 let selectedNodesRefs = [];
+let storeItemRefs: any[] = [];
 
-const setNodeItemRef = (el: any) => {
+const setNodeItemRef = (el: HTMLElement | ComponentPublicInstance | HTMLAttributes | null | Element, index: string) => {
+    if (nodesRefs.value.length == nodes.value.length) return
+    console.log('我执行了');
     if (el) {
-        nodesRefs.push(el);
+        nodesRefs.value.push({
+            id: index,
+            el: el
+        });
+    }
+}
+
+const setStoreItemRefs = (el: any) => {
+    if (el) {
+        storeItemRefs.push(el);
     }
 }
 
@@ -133,15 +172,23 @@ const clickCardHandler = (card: CardNode) => {
 }
 
 const confirmNodeStyle = (card: CardNode) => {
-    // if (containerRef.value) {
-    //    console.log(containerRef.value.children[10]);
-    // }
-    if (typeof (card.nodeIndex) == 'number') {
-        const nodeProxy = nodesRefs[card.nodeIndex];
-        console.log('下标:' + card.nodeIndex);
-        console.log(nodeProxy);
-        nodeProxy.$el.style.left = 0;
+    let nodeProxy = {} as any;
+    // nodesRefs.value.forEach((item: any) => {
+    //     if (item.id == card.id) {
+    //         console.log(item.el);
+    //         nodeProxy = item.el;
+    //     }
+    // })
+    for (let i = 0; i < nodesRefs.value.length; i++) {
+        if (nodesRefs.value[i].id == card.id) {
+            nodeProxy = nodesRefs.value[i].el;
+            break;
+        }
     }
+    if (nodeProxy) {
+        nodeProxy.$el.style = `position: absolute; z-index: ${card.zIndex}; top: ${storeItemPostionList.value[selectedNodes.value.length].top}px; left: ${storeItemPostionList.value[selectedNodes.value.length].left}px;`;
+    }
+    // card = { ...card, ...{ top: storeItemPostionList.value[selectedNodes.value.length].top, left: storeItemPostionList.value[selectedNodes.value.length].left } }
 }
 
 const dropCardHandler = () => {
@@ -159,10 +206,6 @@ const loseHandler = () => {
     console.log('失败了');
     loseAudioRef.value?.play();
     failModal.value = true;
-}
-
-const cardTapHandler = (card: CardNode) => {
-
 }
 
 // 卡片四种状态  0： 无状态  1： 可点击 2：已选 3：已消除
@@ -189,6 +232,7 @@ const successModalTapHandler = (type: string) => {
         successModal.value = false;
         switch (type) {
             case 'next':
+                nodesRefs.value = [];
                 state.currentLevel += 1;
                 initCardList(state.levelConfig[state.currentLevel]);
                 break;
@@ -205,6 +249,7 @@ const failModalTapHandler = (type: string) => {
         failModal.value = false;
         switch (type) {
             case 'restart':
+                nodesRefs.value = [];
                 initCardList(state.levelConfig[state.currentLevel]);
                 break;
             case 'back':
@@ -212,6 +257,20 @@ const failModalTapHandler = (type: string) => {
                 break;
         }
     }, 300);
+}
+
+const calcStoreItemPostion = () => {
+    console.log(storeItemRefs);
+    storeItemRefs.forEach(item => {
+        let rect = item.getBoundingClientRect();
+        console.log(rect);
+        let obj = {
+            top: rect.top,
+            left: rect.left - rect.width * 7
+        }
+        storeItemPostionList.value.push(obj);
+    })
+    console.log('位置数组:' + JSON.stringify(storeItemPostionList.value));
 }
 
 const {
@@ -223,7 +282,7 @@ const {
     selectCardHandler,
     rollbackOneCardHandler,
     removeThreeCardHandler,
-    selectCardAndRemoveHandler,
+    shuffleCardListHandler,
     initCardList,
 } = initGame({
     container: containerRef,
@@ -241,8 +300,11 @@ onMounted(() => {
     windowDraw()
     calcRate()
     initGrassList();
-    initCardList();
     state.currentDate = '- ' + getCurrentDate() + ' -';
+    calcStoreItemPostion();
+    nextTick(() => {
+        initCardList();
+    })
 })
 
 onUnmounted(() => {
@@ -356,9 +418,9 @@ const initGrassList = () => {
         }
 
         .game-card-section {
-            height: 75%;
+            height: calc(100% - 235px);
             min-height: 640px;
-            position: relative;
+            // position: relative;
             display: grid;
             /* 指定每一行的宽度 每个宽度中间用空格隔开 */
             grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -422,7 +484,11 @@ const initGrassList = () => {
         }
 
         .game-store-section {
-            height: calc(25% - 60px);
+            height: 175px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
 
             .game-store-content {
                 box-sizing: content-box;
@@ -431,7 +497,35 @@ const initGrassList = () => {
                 background-color: #965a1c;
                 border: 10px #c1812f solid;
                 border-radius: 5px;
+
+                .store-item {
+                    width: 60px;
+                    height: 60px;
+                }
             }
+
+            .btn-section {
+                width: 440px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 20px;
+
+                .btn-item {
+                    width: 100px;
+                    height: 50px;
+                    background-color: #22a4ff;
+                    border-radius: 10px;
+                    border-bottom: 5px #1580ca solid;
+                    cursor: pointer;
+
+                    .btn-title {
+                        color: #fff;
+                        font-size: 17px;
+                    }
+                }
+            }
+
         }
     }
 }

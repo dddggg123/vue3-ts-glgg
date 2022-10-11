@@ -1,8 +1,8 @@
 <template>
-    <div class="card-container flex-c" :class="{'card-dock': isDock}"
+    <div class="card-container flex-c" :data-id="node.id" :data-state="node.state"
         :style="isDock?{}:{ position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px` }"
         @click="cardTapAction">
-        <div class="card-section flex-c">
+        <div class="card-section">
             <div class="card-content flex-c">
                 <img class="card-img" :src="imgMapObj[node.type]" :alt="`${node.type}`">
                 <!-- <img :src="'./../../assets/icons/caomei.png'"/> -->
@@ -19,13 +19,12 @@ import type { CardNode, GameConfig } from "../../types/type";
 interface Props {
     node: CardNode
     isDock?: boolean
-    nodeIndex: number
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(['cardTap']);
 
-const { node, nodeIndex } = props;
+const { node } = props;
 
 // 加载图片资源
 const modulesFiles = import.meta.globEager('../../assets/icons/*.png');
@@ -44,9 +43,6 @@ const isForbid = computed(() => {
 
 const cardTapAction = () => {
     if (isForbid.value) return;
-    node.nodeIndex = nodeIndex;
-    console.log('nodeIndex:' + nodeIndex);
-    console.log('node:' + JSON.stringify(node));
     emit('cardTap', node);
 }
 
@@ -64,13 +60,15 @@ const px2rem = (px: string) => {
     width: 60px;
     height: 60px;
     background-color: #5d731a;
-    border-radius: 10px;
+    border-radius: 3px;
     cursor: pointer;
+    transition: all .3s ease-in-out;
 
     .card-section {
         width: 100%;
         height: 100%;
         position: relative;
+        overflow: hidden;
 
         .card-mask {
             position: absolute;
@@ -78,7 +76,7 @@ const px2rem = (px: string) => {
             left: 0;
             bottom: 0;
             right: 0;
-            border-radius: 10px;
+            border-radius: 3px;
             background-color: rgba($color: #000000, $alpha: .6);
             pointer-events: none;
             cursor: none;
@@ -86,9 +84,11 @@ const px2rem = (px: string) => {
 
         .card-content {
             width: 55px;
-            height: 55px;
-            border-radius: 10px;
+            height: 53px;
+            border-radius: 3px;
             background-color: #f3ffd1;
+            margin: 0 auto;
+            margin-top: 2px;
 
             .card-img {
                 width: 50px;
