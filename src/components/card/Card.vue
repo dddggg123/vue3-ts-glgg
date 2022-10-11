@@ -19,12 +19,13 @@ import type { CardNode, GameConfig } from "../../types/type";
 interface Props {
     node: CardNode
     isDock?: boolean
+    nodeIndex: number
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(['cardTap']);
 
-const { node } = props;
+const { node, nodeIndex } = props;
 
 // 加载图片资源
 const modulesFiles = import.meta.globEager('../../assets/icons/*.png');
@@ -43,6 +44,9 @@ const isForbid = computed(() => {
 
 const cardTapAction = () => {
     if (isForbid.value) return;
+    node.nodeIndex = nodeIndex;
+    console.log('nodeIndex:' + nodeIndex);
+    console.log('node:' + JSON.stringify(node));
     emit('cardTap', node);
 }
 

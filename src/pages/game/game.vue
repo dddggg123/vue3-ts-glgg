@@ -21,16 +21,15 @@
                 <div v-for="(item, index) in state.grassList" :key="index" class="grass-item">
                     <img :src="item.url" class="grass-img">
                 </div>
-                <template v-for="item in nodes" :key="item.id">
-                    <transition name="fade">
-                        <Card v-if="confirmCardVisible(item.state)" @cardTap="selectCardHandler" :node="item"></Card>
-                    </transition>
+                <template v-for="(item, index) in nodes" :key="item.id">
+                    <Card :node-index="index" :ref="setNodeItemRef" v-if="confirmCardVisible(item.state)" @cardTap="selectCardHandler"
+                        :node="item"></Card>
                 </template>
             </div>
             <div class="game-store-section flex-c">
                 <div class="game-store-content flex-l">
-                    <template v-for="item in selectedNodes" :key="item.id">
-                        <Card v-if="item.state === 2" :isDock="true" :node="item"></Card>
+                    <template v-for="(item, index) in selectedNodes" :key="item.id">
+                        <Card :node-index="index" v-if="item.state === 2" :isDock="true" :node="item"></Card>
                     </template>
                 </div>
             </div>
@@ -82,6 +81,24 @@ const gameAudioRef = ref<HTMLAudioElement | undefined>()
 const successModal = ref(false)
 const failModal = ref(false)
 
+/**
+ * 卡片对应html元素数组
+*/
+let nodesRefs: any[] = [];
+let selectedNodesRefs = [];
+
+const setNodeItemRef = (el: any) => {
+    if (el) {
+        nodesRefs.push(el);
+    }
+}
+
+const setSelectedNodeItemRef = (el: any) => {
+    if (el) {
+        selectedNodesRefs.push(el);
+    }
+}
+
 const state = reactive({
     grassList: [
     ] as Array<grassObj>,
@@ -105,12 +122,25 @@ const state = reactive({
 })
 const musicEnable = ref(false);
 
-const clickCardHandler = () => {
+const clickCardHandler = (card: CardNode) => {
+    confirmNodeStyle(card);
     if (clickAudioRef.value?.paused) {
         clickAudioRef.value.play()
     } else if (clickAudioRef.value) {
         clickAudioRef.value.load()
         clickAudioRef.value.play()
+    }
+}
+
+const confirmNodeStyle = (card: CardNode) => {
+    // if (containerRef.value) {
+    //    console.log(containerRef.value.children[10]);
+    // }
+    if (typeof (card.nodeIndex) == 'number') {
+        const nodeProxy = nodesRefs[card.nodeIndex];
+        console.log('下标:' + card.nodeIndex);
+        console.log(nodeProxy);
+        nodeProxy.$el.style.left = 0;
     }
 }
 
@@ -374,21 +404,21 @@ const initGrassList = () => {
                 }
             }
 
-            .fade-enter-active,
-            .fade-leave-active {
-                transition: all 0.5s ease-in-out;
-            }
+            // .fade-enter-active,
+            // .fade-leave-active {
+            //     transition: all 0.5s ease-in-out;
+            // }
 
-            .fade-ente-from,
-            .fade-leave-to {
-                opacity: 0;
-                transform: translateY(450px);
-            }
+            // .fade-ente-from,
+            // .fade-leave-to {
+            //     opacity: 0;
+            //     transform: translateY(450px);
+            // }
 
-            .fade-enter-to,
-            .fade-leave-from {
-                opacity: 1;
-            }
+            // .fade-enter-to,
+            // .fade-leave-from {
+            //     opacity: 1;
+            // }
         }
 
         .game-store-section {

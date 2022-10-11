@@ -150,7 +150,7 @@ export default function initGame(config: GameConfig): Game {
     const selectCardHandler = (card: CardNode) => {
         // console.log('我点击的节点:' + JSON.stringify(card));
         if (selectedNodes.value.length === 7) return;
-        card.state = 2
+        // card.state = 2
         histroyList.value.push(card)
         preNode.value = card
         const index = nodes.value.findIndex(o => o.id === card.id)
@@ -180,7 +180,7 @@ export default function initGame(config: GameConfig): Game {
                 }
             }, 100)
         } else {
-            events.clickCallback && events.clickCallback()
+            events.clickCallback && events.clickCallback(card)
             const index = selectedNodes.value.findIndex(o => o.type === card.type)
             if (index > -1) {
                 selectedNodes.value.splice(index + 1, 0, card);
