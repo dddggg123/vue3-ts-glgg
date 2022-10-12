@@ -1,5 +1,5 @@
 <template>
-    <div class="card-container flex-c" :data-id="node.id" :data-state="node.state"
+    <div :ref="(el: any) => {setCardRef(el)}" class="card-container flex-c" :data-state="node.state"
         :style="isDock?{}:{ position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px` }"
         @click="cardTapAction">
         <div class="card-section">
@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, VNodeRef, ref } from 'vue';
 import type { CardNode, GameConfig } from "../../types/type";
 
 interface Props {
@@ -48,6 +48,14 @@ const cardTapAction = () => {
     emit('cardTap', node);
 }
 
+const storeRef = ref<HTMLElement | undefined>()
+
+const setCardRef = (el: undefined | HTMLElement) => {
+    node.ref = el;
+    // storeRef.value = el;
+    // console.log(node.ref?.style);
+}
+
 const px2rem = (px: string) => {
     if (/%/ig.test(px)) { // 有百分号%，特殊处理，表述pc是一个有百分号的数，比如：90%
         return px
@@ -59,12 +67,12 @@ const px2rem = (px: string) => {
 
 <style lang="scss" scoped>
 .card-container {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     background-color: #5d731a;
     border-radius: 3px;
     cursor: pointer;
-    transition: all .2s ease-in-out;
+    transition: all .4s ease-in-out;
 
     .card-section {
         width: 100%;
@@ -85,16 +93,16 @@ const px2rem = (px: string) => {
         }
 
         .card-content {
-            width: 55px;
-            height: 53px;
+            width: 45px;
+            height: 43px;
             border-radius: 3px;
             background-color: #f3ffd1;
             margin: 0 auto;
             margin-top: 2px;
 
             .card-img {
-                width: 50px;
-                height: 50px;
+                width: 40px;
+                height: 40px;
             }
         }
     }

@@ -1,4 +1,4 @@
-import { Ref } from "vue";
+import { Ref, VNodeRef } from "vue";
 
 export interface Game {
 	nodes: Ref<CardNode[]>;
@@ -7,6 +7,7 @@ export interface Game {
 	removeFlag: Ref<boolean>;
 	backFlag: Ref<boolean>;
 	selectCardHandler: (node: CardNode) => void;
+    selectRemoveCardHandler: (node: CardNode) => void;
 	shuffleCardListHandler: () => void;
 	rollbackOneCardHandler: () => void;
 	removeThreeCardHandler: () => void;
@@ -25,7 +26,8 @@ export type CardNode = {
 	top: number;
 	left: number;
 	state: number; // 卡片四种状态  0： 无状态  1： 可点击 2：已选 3：已消除
-    nodeIndex?: number;
+    nodeIndex: number;
+    ref?:  undefined | HTMLElement
 };
 
 export interface GameConfig {

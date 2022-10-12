@@ -1,5 +1,5 @@
 <template>
-    <div class="game-container">
+    <div class="game-container flex-c">
         <div ref="screenRef" class="game-content">
             <div class="game-header-section flex-c">
                 <!-- <p class="game-title">果了个果</p> -->
@@ -24,36 +24,42 @@
                 <template v-for="(item, index) in nodes" :key="item.id">
                     <!-- <Card v-if="item.state === 0 || item.state === 1"
                         @cardTap="selectCardHandler" :node="item"></Card> -->
-                    <Card :nodeIndex="index" :ref="(el) => {setNodeItemRef(el, item.id)}" v-if="item.state === 0 || item.state === 1"
-                        @cardTap="selectCardHandler" :node="item"></Card>
+                    <Card :nodeIndex="index" v-if="item.state === 0 || item.state === 1" @cardTap="selectCardHandler"
+                        :node="item"></Card>
                 </template>
             </div>
             <div class="game-store-section">
-                <div ref="storeRef" class="game-store-content flex-l">
-                    <template v-if="selectedNodes.length">
-                        <template v-for="(item, index) in selectedNodes" :key="item.id">
-                            <Card :nodeIndex="index" v-if="item.state === 2" :isDock="true" :node="item"></Card>
+                <div class="game-store-content">
+                    <div ref="storeRef" class="game-store flex-l">
+                        <template v-if="selectedNodes.length">
+                            <template v-for="(item, index) in selectedNodes" :key="item.id">
+                                <Card :nodeIndex="index" v-if="item.state === 2" :isDock="true" :node="item"></Card>
+                            </template>
                         </template>
-                    </template>
-                    <template v-else>
-                        <div :ref="setStoreItemRefs" class="store-item" :key="item"
-                            v-for="item in [1, 2, 3, 4, 5, 6, 7]"></div>
-                    </template>
+                        <template v-else>
+                            <div :ref="setStoreItemRefs" class="store-item" :key="item"
+                                v-for="item in [1, 2, 3, 4, 5, 6, 7]"></div>
+                        </template>
+                    </div>
                 </div>
                 <div class="btn-section">
-                    <div @click="removeThreeCardHandler" class="btn-item flex-c">
+                    <button :disabled="removeFlag" @click="removeThreeCardHandler" class="btn-item flex-c">
                         <span class="btn-title">移出</span>
-                    </div>
-                    <div @click="rollbackOneCardHandler" class="btn-item flex-c">
+                    </button>
+                    <button :disabled="backFlag" @click="rollbackOneCardHandler" class="btn-item flex-c">
                         <span class="btn-title">回退</span>
-                    </div>
-                    <div @click="shuffleCardListHandler" class="btn-item flex-c">
+                    </button>
+                    <button @click="shuffleCardListHandler" class="btn-item flex-c">
                         <span class="btn-title">打乱</span>
-                    </div>
+                    </button>
                 </div>
             </div>
-            <ModalSuccess :isLast="state.currentLevel == state.levelConfig.length - 1" :modal="successModal" @successModalTap="successModalTapHandler"></ModalSuccess>
+            <ModalSuccess :isLast="state.currentLevel == state.levelConfig.length - 1" :modal="successModal"
+                @successModalTap="successModalTapHandler"></ModalSuccess>
             <ModalFail :modal="failModal" @failModalTap="failModalTapHandler"></ModalFail>
+            <div class="remove-card-section flex-l">
+                <Card :nodeIndex="index" v-for="(item, index) in removeList" :key="item.id" :node="item" is-dock @cardTap="selectRemoveCardHandler"></Card>
+            </div>
         </div>
         <audio ref="clickAudioRef" style="display: none;" preload="auto" controls>
             <source src="@/assets/audios/click.mp3" />
@@ -77,14 +83,15 @@
 import Card from '@/components/card/Card.vue';
 import ModalSuccess from '@/components/modal/ModalSuccess.vue';
 import ModalFail from '@/components/modal/ModalFail.vue';
-import type { CardNode, GameConfig } from "../../types/type";
+import type { CardNode } from "../../types/type";
 import initGame from './game';
-import { ref, onMounted, reactive, onUnmounted, nextTick, ComponentPublicInstance, HTMLAttributes } from 'vue';
+import { ref, onMounted, reactive, onUnmounted, nextTick } from 'vue';
 import Grass1 from '@/assets/icons/grass1.png';
 import Grass2 from '@/assets/icons/grass2.png';
 import { showSuccessAnimation, getCurrentDate } from '../../utils/util';
 import windowResize from '../../utils/resize';
 import { useRouter } from 'vue-router';
+import { react } from '@babel/types';
 
 type grassObj = {
     url: string
@@ -95,10 +102,10 @@ type positionObj = {
     left: number
 }
 
-const router = useRouter();
-const { screenRef, calcRate, windowDraw, unWindowDraw } = windowResize()
+const router = useRouter()
+const screenRef = ref()
+const storeRef = ref()
 const containerRef = ref<HTMLElement | undefined>()
-const storeRef = ref<HTMLElement | undefined>()
 const clickAudioRef = ref<HTMLAudioElement | undefined>()
 const dropAudioRef = ref<HTMLAudioElement | undefined>()
 const winAudioRef = ref<HTMLAudioElement | undefined>()
@@ -108,33 +115,11 @@ const successModal = ref(false)
 const failModal = ref(false)
 const storeItemPostionList = ref([] as Array<positionObj>)
 
-/**
- * 卡片对应html元素数组
-*/
-const nodesRefs = ref<any>([]);
-let selectedNodesRefs = [];
 let storeItemRefs: any[] = [];
-
-const setNodeItemRef = (el: HTMLElement | ComponentPublicInstance | HTMLAttributes | null | Element, index: string) => {
-    if (nodesRefs.value.length == nodes.value.length) return
-    console.log('我执行了');
-    if (el) {
-        nodesRefs.value.push({
-            id: index,
-            el: el
-        });
-    }
-}
 
 const setStoreItemRefs = (el: any) => {
     if (el) {
         storeItemRefs.push(el);
-    }
-}
-
-const setSelectedNodeItemRef = (el: any) => {
-    if (el) {
-        selectedNodesRefs.push(el);
     }
 }
 
@@ -172,23 +157,29 @@ const clickCardHandler = (card: CardNode) => {
 }
 
 const confirmNodeStyle = (card: CardNode) => {
-    let nodeProxy = {} as any;
+    // let nodeProxy = {} as any;
     // nodesRefs.value.forEach((item: any) => {
     //     if (item.id == card.id) {
     //         console.log(item.el);
     //         nodeProxy = item.el;
     //     }
     // })
-    for (let i = 0; i < nodesRefs.value.length; i++) {
-        if (nodesRefs.value[i].id == card.id) {
-            nodeProxy = nodesRefs.value[i].el;
-            break;
-        }
-    }
-    if (nodeProxy) {
-        nodeProxy.$el.style = `position: absolute; z-index: ${card.zIndex}; top: ${storeItemPostionList.value[selectedNodes.value.length].top}px; left: ${storeItemPostionList.value[selectedNodes.value.length].left}px; opacity: 0;`;
-    }
+    // for (let i = 0; i < nodesRefs.value.length; i++) {
+    //     if (nodesRefs.value[i].id == card.id) {
+    //         nodeProxy = nodesRefs.value[i].el;
+    //         break;
+    //     }
+    // }
+    // if (nodeProxy) {
+    //     nodeProxy.$el.style = `position: absolute; z-index: ${card.zIndex}; top: ${storeItemPostionList.value[selectedNodes.value.length].top}px; left: ${storeItemPostionList.value[selectedNodes.value.length].left}px; opacity: 0;`;
+    // }
     // card = { ...card, ...{ top: storeItemPostionList.value[selectedNodes.value.length].top, left: storeItemPostionList.value[selectedNodes.value.length].left } }
+    const top = storeItemPostionList.value[selectedNodes.value.length].top;
+    const left = storeItemPostionList.value[selectedNodes.value.length].left;
+    console.log(card.ref);
+    card.ref?.setAttribute('style', `position: absolute; z-index: ${card.zIndex}; top: ${top}px; left: ${left}px;`);
+    console.log('赋值top:' + top);
+    console.log('赋值left:' + left);
 }
 
 const dropCardHandler = () => {
@@ -204,11 +195,6 @@ const winHandler = () => {
 const loseHandler = () => {
     loseAudioRef.value?.play();
     failModal.value = true;
-}
-
-// 卡片四种状态  0： 无状态  1： 可点击 2：已选 3：已消除
-const confirmCardVisible = (state: number): boolean => {
-    return [0, 1].includes(state);
 }
 
 const audioEndedHandler = () => {
@@ -230,7 +216,6 @@ const successModalTapHandler = (type: string) => {
         successModal.value = false;
         switch (type) {
             case 'next':
-                nodesRefs.value = [];
                 if (state.currentLevel === state.levelConfig.length - 1) {
                     state.currentLevel = 0;
                 } else {
@@ -251,7 +236,6 @@ const failModalTapHandler = (type: string) => {
         failModal.value = false;
         switch (type) {
             case 'restart':
-                nodesRefs.value = [];
                 initCardList(state.levelConfig[state.currentLevel]);
                 break;
             case 'back':
@@ -262,11 +246,14 @@ const failModalTapHandler = (type: string) => {
 }
 
 const calcStoreItemPostion = () => {
-    storeItemRefs.forEach(item => {
-        let rect = item.getBoundingClientRect();
+    storeItemPostionList.value = [];
+    const xOffset = (screenRef.value.getBoundingClientRect().width - storeRef.value.getBoundingClientRect().width) / 2;
+    // const xOffset = storeRef.value.getBoundingClientRect().left;
+    storeItemRefs.forEach((item, index) => {
+        let rect: DOMRect = item.getBoundingClientRect();
         let obj = {
             top: rect.top,
-            left: rect.left - rect.width * 12
+            left: xOffset + index * rect.width
         }
         storeItemPostionList.value.push(obj);
     })
@@ -279,6 +266,7 @@ const {
     removeList,
     backFlag,
     selectCardHandler,
+    selectRemoveCardHandler,
     rollbackOneCardHandler,
     removeThreeCardHandler,
     shuffleCardListHandler,
@@ -296,18 +284,18 @@ const {
 
 onMounted(() => {
     // 监听浏览器窗口尺寸变化
-    windowDraw()
-    calcRate()
+    // windowDraw()
+    // calcRate()
     initGrassList();
     state.currentDate = '- ' + getCurrentDate() + ' -';
-    calcStoreItemPostion();
     nextTick(() => {
         initCardList();
+        calcStoreItemPostion();
     })
 })
 
 onUnmounted(() => {
-    unWindowDraw();
+    // unWindowDraw();
 })
 
 const initGrassList = () => {
@@ -327,14 +315,14 @@ const initGrassList = () => {
 
 <style lang="scss" scoped>
 .game-container {
-    background-color: #c3fe8b;
-    height: 100%;
+    // background-color: #c3fe8b;
     overflow-y: auto;
     /* 隐藏滚动条 */
     scrollbar-width: none;
     /* firefox */
     -ms-overflow-style: none;
     /* IE 10+ */
+    background-color: #c3fe8b;
 
     &::-webkit-scrollbar {
         display: none;
@@ -343,8 +331,15 @@ const initGrassList = () => {
 
     .game-content {
         width: 500px;
-        height: 100%;
-        margin: 0 auto;
+        position: relative;
+
+        .remove-card-section {
+            position: absolute;
+            left: 0;
+            bottom: 185px;
+            width: 150px;
+            height: 50px;
+        }
 
         .game-header-section {
             height: 60px;
@@ -417,8 +412,9 @@ const initGrassList = () => {
         }
 
         .game-card-section {
-            height: calc(100% - 235px);
-            min-height: 640px;
+            // height: calc(100% - 235px);
+            // min-height: 640px;
+            height: 640px;
             // position: relative;
             display: grid;
             /* 指定每一行的宽度 每个宽度中间用空格隔开 */
@@ -491,20 +487,25 @@ const initGrassList = () => {
 
             .game-store-content {
                 box-sizing: content-box;
-                width: 420px;
-                height: 60px;
+                width: 350px;
+                height: 50px;
                 background-color: #965a1c;
                 border: 10px #c1812f solid;
                 border-radius: 5px;
 
+                .game-store {
+                    width: 100%;
+                    height: 100%;
+                }
+
                 .store-item {
-                    width: 60px;
-                    height: 60px;
+                    width: 50px;
+                    height: 50px;
                 }
             }
 
             .btn-section {
-                width: 440px;
+                width: 370px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -513,6 +514,7 @@ const initGrassList = () => {
                 .btn-item {
                     width: 100px;
                     height: 50px;
+                    border: none;
                     background-color: #22a4ff;
                     border-radius: 10px;
                     border-bottom: 5px #1580ca solid;

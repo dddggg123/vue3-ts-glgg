@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import type { CardNode, GameConfig, Game } from "../../types/type";
-import { ceil, floor, random, shuffle } from "lodash-es";
+import { ceil, floor, random, shuffle, cloneDeep } from "lodash-es";
 
 const cardImgArr: Array<string> = [
     "boluo",
@@ -33,9 +33,9 @@ const defaultGameConfig: GameConfig = {
     delNode: false,
 };
 
+let itemList: number[] = [];
+
 export default function initGame(config: GameConfig): Game {
-    const selectedCardList = ref<CardNode[]>([]);
-    const removeCardList = ref<CardNode[]>([]);
     const {
         container,
         delNode,
@@ -51,7 +51,7 @@ export default function initGame(config: GameConfig): Game {
     const indexSet = new Set();
     let perFloorNodes: CardNode[] = [];
     const selectedNodes = ref<CardNode[]>([]);
-    const size = 60;
+    const size = 50;
     let floorList: number[][] = [];
 
     const initCardList = (config?: GameConfig | null) => {
@@ -68,10 +68,10 @@ export default function initGame(config: GameConfig): Game {
         floorList = [];
         const isTrap = trap && floor(random(0, 100)) !== 50;
         let shuffleCardImgArr = shuffle(cardImgArr);
+        itemList = [];
 
         // 生成节点池
         const itemTypes = new Array(cardNum).fill(0).map((_, index) => index + 1);
-        let itemList: number[] = [];
         for (let i = 0; i < 3 * layerNum; i++)
             itemList = [...itemList, ...itemTypes];
 
@@ -82,7 +82,6 @@ export default function initGame(config: GameConfig): Game {
         // console.log('卡牌列表:' + JSON.stringify(itemList));
         // 打乱节点
         itemList = shuffle(shuffle(itemList));
-
         // 初始化各个层级节点
         let len = 0;
         let floorIndex = 1;
@@ -94,18 +93,16 @@ export default function initGame(config: GameConfig): Game {
             len += floorNum;
             floorIndex++;
         }
-        const yOffset = 20; // y轴偏移量
         const containerWidth = container!.value!.clientWidth;
         const containerHeight = container!.value!.clientHeight;
         const width = containerWidth / 2;
-        const height = containerHeight / 2 - yOffset;
+        const height = containerHeight / 2;
 
-        let nodeArr = [];
         floorList.forEach((o, index) => {
             indexSet.clear();
             let i = 0;
             const floorNodes: CardNode[] = [];
-            o.forEach((k) => {
+            o.forEach((k, index1) => {
                 i = floor(random(0, (index + 1) ** 2));
                 while (indexSet.has(i)) i = floor(random(0, (index + 1) ** 2));
                 const row = floor(i / (index + 1));
@@ -121,6 +118,7 @@ export default function initGame(config: GameConfig): Game {
                     left: width + (size * column - (size / 2) * index),
                     parents: [],
                     state: 0,
+                    nodeIndex: 0
                 };
                 const xy = [node.top, node.left];
                 perFloorNodes.forEach((e) => {
@@ -130,13 +128,12 @@ export default function initGame(config: GameConfig): Game {
                 floorNodes.push(node);
                 indexSet.add(i);
             });
-            nodeArr = nodeArr.concat(floorNodes);
+            nodes.value = nodes.value.concat(floorNodes);
             perFloorNodes = floorNodes;
         });
-        nodeArr.forEach((o) => {
+        nodes.value.forEach((o) => {
             o.state = o.parents.every((p) => p.state > 0) ? 1 : 0;
         });
-        nodes.value = nodeArr;
     };
 
     /**
@@ -148,7 +145,7 @@ export default function initGame(config: GameConfig): Game {
         // 为了动画效果添加延迟
         setTimeout(() => {
             card.state = 2
-        }, 210);
+        }, 410);
         histroyList.value.push(card)
         preNode.value = card
         const index = nodes.value.findIndex(o => o.id === card.id)
@@ -177,7 +174,7 @@ export default function initGame(config: GameConfig): Game {
                 } else {
                     events.dropCallback && events.dropCallback()
                 }
-            }, 220)
+            }, 420)
         } else {
             setTimeout(() => {
                 nodes.value[card.nodeIndex] = card;
@@ -195,22 +192,113 @@ export default function initGame(config: GameConfig): Game {
                     backFlag.value = true
                     events.loseCallback && events.loseCallback()
                 }
-            }, 220);
+            }, 420);
         }
     };
+    const selectRemoveCardHandler = (card: CardNode) => {
+        const index = removeList.value.findIndex(o => o.id === card.id)
+        if (index > -1) {
+            removeList.value.splice(index, 1)
+            selectCardHandler(card)
+        }
+    }
     /**
      * card点击事件
      * 3个同类型的card移除事件
      */
-    const shuffleCardListHandler = () => { };
+    const shuffleCardListHandler = () => {
+        // nodes.value = shuffle(shuffle(nodes.value));
+        perFloorNodes = [];
+        // 初始化各个层级节点
+        let len = 0;
+        let floorIndex = 1;
+        const itemLength = itemList.length;
+        while (len <= itemLength) {
+            const maxFloorNum = floorIndex * floorIndex;
+            const floorNum = ceil(random(maxFloorNum / 2, maxFloorNum));
+            floorList.push(itemList.splice(0, floorNum));
+            len += floorNum;
+            floorIndex++;
+        }
+        const containerWidth = container!.value!.clientWidth;
+        const containerHeight = container!.value!.clientHeight;
+        const width = containerWidth / 2;
+        const height = containerHeight / 2;
+        let nodesArr: Array<CardNode> = cloneDeep(nodes.value);
+        let nodeItem: CardNode;
+        let nodeItemArr: Array<CardNode> = [];
+        nodes.value = [];
+        floorList.forEach((o, index) => {
+            indexSet.clear();
+            let i = 0;
+            let floorNodes: CardNode[] = [];
+            o.forEach((k, index1) => {
+                let indexPath = 0;
+                for (let j = 0; j < index; j++) {
+                    indexPath += floorList[j].length;
+                }
+                indexPath += index1;
+                i = floor(random(0, (index + 1) ** 2));
+                while (indexSet.has(i)) i = floor(random(0, (index + 1) ** 2));
+                let row = floor(i / (index + 1));
+                let column = index ? i % index : 0;
+                if (nodesArr[indexPath].state === 0 || nodesArr[indexPath].state === 1) {
+                    nodeItem = {...nodesArr[indexPath], ...{
+                        top: height + (size * row - (size / 2) * index),
+                        left: width + (size * column - (size / 2) * index),
+                        parents: [],
+                        state: 0,
+                        nodeIndex: 0
+                    }}
+                } else {
+                    nodeItem = nodesArr[indexPath];
+                }
+                let node: CardNode = nodeItem;
+                let xy = [node.top, node.left];
+                perFloorNodes.forEach((e) => {
+                    if (Math.abs(e.top - xy[0]) <= size && Math.abs(e.left - xy[1]) <= size)
+                        e.parents.push(node);
+                });
+                floorNodes.push(node);
+                indexSet.add(i);
+            });
+            nodeItemArr = nodeItemArr.concat(floorNodes);
+            perFloorNodes = floorNodes;
+        });
+        nodeItemArr.forEach((o) => {
+            if (o.state !== 2) {
+                o.state = o.parents.every((p) => p.state > 0) ? 1 : 0;
+            } 
+        });
+        nodes.value = nodeItemArr;
+        console.log(nodeItemArr);
+    };
     /**
      * 移出3个card事件
      */
-    const removeThreeCardHandler = () => { };
+    const removeThreeCardHandler = () => {
+        if (selectedNodes.value.length < 3) return
+        removeFlag.value = true
+        preNode.value = null
+        for (let i = 0; i < 3; i++) {
+        const node = selectedNodes.value.shift()
+        if (!node) return
+            removeList.value.push(node)
+        }
+    };
     /**
      *  回退1个card事件
      */
-    const rollbackOneCardHandler = () => { };
+    const rollbackOneCardHandler = () => {
+        const node = preNode.value
+        if (!node) return
+        preNode.value = null
+        backFlag.value = true
+        node.state = 0
+        delNode && nodes.value.push(node)
+        const index = selectedNodes.value.findIndex(o => o.id === node.id)
+        selectedNodes.value.splice(index, 1)
+    };
 
     return {
         nodes,
@@ -219,6 +307,7 @@ export default function initGame(config: GameConfig): Game {
         removeList,
         backFlag,
         selectCardHandler,
+        selectRemoveCardHandler,
         rollbackOneCardHandler,
         removeThreeCardHandler,
         shuffleCardListHandler,

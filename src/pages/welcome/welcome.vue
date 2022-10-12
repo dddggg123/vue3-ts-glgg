@@ -1,6 +1,6 @@
 <template>
-    <div class="welcome-container">
-        <div ref="screenRef" class="welcome-content">
+    <div class="welcome-container flex-c">
+        <div class="welcome-content">
             <div class="welcome-header-section flex-c">
                 <p class="welcome-title">果了个果</p>
                 <img class="welcome-img1" src="@/assets/icons/caomei.png" alt="" />
@@ -26,6 +26,7 @@
                     <p @click="startGameAction" class="btn-title flex-c">
                         <span>开始挑战</span>
                     </p>
+                    <p class="version">版本号：1.0.101201</p>
                 </div>
             </div>
         </div>
@@ -40,11 +41,9 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import windowResize from '../../utils/resize';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { ref } from 'vue';
 
 const router = useRouter();
-const { screenRef, calcRate, windowDraw, unWindowDraw } = windowResize()
 const welcomeAudioRef = ref();
 const clickAudioRef = ref();
 const cardImgArr: Array<string> = [
@@ -104,28 +103,21 @@ const audioEndedHandler = () => {
     welcomeAudioRef.value.play();
 }
 
-onMounted(() => {
-    // 监听浏览器窗口尺寸变化
-    windowDraw()
-    calcRate()
-})
-
-onUnmounted(() => {
-    unWindowDraw();
-})
-
 </script>
 
 <style lang="scss" scoped>
 .welcome-container {
     background-color: #c3fe8b;
     height: 100%;
-    overflow: hidden;
+    overflow-y: auto;
+    /* 隐藏滚动条 */
+    scrollbar-width: none;
+    /* firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
 
     .welcome-content {
         width: 500px;
-        height: 100%;
-        margin: 0 auto;
 
         .welcome-header-section {
             height: 100px;
@@ -221,7 +213,7 @@ onUnmounted(() => {
         }
 
         .welcome-content-section {
-            height: calc(100% - 100px);
+            height: 775px;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
@@ -269,6 +261,12 @@ onUnmounted(() => {
             .btn-section {
                 text-align: center;
                 height: 20%;
+                flex-direction: column;
+
+                .version {
+                    font-size: 13px;
+                    margin-top: 5px;
+                }
 
                 .btn-title {
                     width: 300px;
