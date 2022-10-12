@@ -19,9 +19,11 @@ html {
 }
 
 #app {
+  min-height: 875px;
   height: 100%;
   padding: 0;
   margin: 0;
+  background-color: #c3fe8b;
 }
 
 .flex-c {

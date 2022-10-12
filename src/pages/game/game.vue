@@ -33,7 +33,7 @@
                     <div ref="storeRef" class="game-store flex-l">
                         <template v-if="selectedNodes.length">
                             <template v-for="(item, index) in selectedNodes" :key="item.id">
-                                <Card :nodeIndex="index" v-if="item.state === 2" :isDock="true" :node="item"></Card>
+                                <Card :nodeIndex="index" v-if="item.state === 2" is-dock :node="item"></Card>
                             </template>
                         </template>
                         <template v-else>
@@ -43,13 +43,16 @@
                     </div>
                 </div>
                 <div class="btn-section">
-                    <button :disabled="removeFlag" @click="removeThreeCardHandler" class="btn-item flex-c" :class="{'forbid': removeFlag}">
+                    <button :disabled="removeFlag" @click="removeThreeCardHandler" class="btn-item flex-c"
+                        :class="{'forbid': removeFlag}">
                         <span class="btn-title">移出</span>
                     </button>
-                    <button :disabled="backFlag" @click="rollbackOneCardHandler" class="btn-item flex-c" :class="{'forbid': backFlag}">
+                    <button :disabled="backFlag" @click="rollbackOneCardHandler" class="btn-item flex-c"
+                        :class="{'forbid': backFlag}">
                         <span class="btn-title">回退</span>
                     </button>
-                    <button :disabled="shuffleFlag" @click="shuffleCardListHandler" class="btn-item flex-c" :class="{'forbid': shuffleFlag}">
+                    <button :disabled="shuffleFlag" @click="shuffleCardListHandler" class="btn-item flex-c"
+                        :class="{'forbid': shuffleFlag}">
                         <span class="btn-title">打乱</span>
                     </button>
                 </div>
@@ -58,7 +61,8 @@
                 @successModalTap="successModalTapHandler"></ModalSuccess>
             <ModalFail :modal="failModal" @failModalTap="failModalTapHandler"></ModalFail>
             <div class="remove-card-section flex-l">
-                <Card :nodeIndex="index" v-for="(item, index) in removeList" :key="item.id" :node="item" is-dock @cardTap="selectRemoveCardHandler"></Card>
+                <Card :nodeIndex="index" v-for="(item, index) in removeList" :key="item.id" :node="item" is-dock
+                    @cardTap="selectRemoveCardHandler"></Card>
             </div>
         </div>
         <audio ref="clickAudioRef" style="display: none;" preload="auto" controls>
@@ -131,14 +135,22 @@ const state = reactive({
             cardNum: 3,
             layerNum: 2,
             trap: false,
+            delNode: true,
         }, {
-            cardNum: 6,
+            cardNum: 5,
             layerNum: 4,
             trap: false,
+            delNode: true,
         }, {
             cardNum: 8,
             layerNum: 6,
             trap: false,
+            delNode: true,
+        }, {
+            cardNum: 10,
+            layerNum: 8,
+            trap: false,
+            delNode: true,
         }
     ],
     currentLevel: 0,
@@ -176,10 +188,8 @@ const confirmNodeStyle = (card: CardNode) => {
     // card = { ...card, ...{ top: storeItemPostionList.value[selectedNodes.value.length].top, left: storeItemPostionList.value[selectedNodes.value.length].left } }
     const top = storeItemPostionList.value[selectedNodes.value.length].top;
     const left = storeItemPostionList.value[selectedNodes.value.length].left;
-    console.log(card.ref);
+    // console.log(card.ref);
     card.ref?.setAttribute('style', `position: absolute; z-index: ${card.zIndex}; top: ${top}px; left: ${left}px;`);
-    console.log('赋值top:' + top);
-    console.log('赋值left:' + left);
 }
 
 const dropCardHandler = () => {
@@ -239,7 +249,7 @@ const failModalTapHandler = (type: string) => {
         failModal.value = false;
         switch (type) {
             case 'restart':
-            removeFlag.value = false;
+                removeFlag.value = false;
                 backFlag.value = false;
                 shuffleFlag.value = false;
                 initCardList(state.levelConfig[state.currentLevel]);
@@ -254,11 +264,12 @@ const failModalTapHandler = (type: string) => {
 const calcStoreItemPostion = () => {
     storeItemPostionList.value = [];
     const xOffset = (screenRef.value.getBoundingClientRect().width - storeRef.value.getBoundingClientRect().width) / 2;
+    const yOffset = (window.innerHeight - screenRef.value.getBoundingClientRect().height) / 2;
     // const xOffset = storeRef.value.getBoundingClientRect().left;
     storeItemRefs.forEach((item, index) => {
         let rect: DOMRect = item.getBoundingClientRect();
         let obj = {
-            top: rect.top,
+            top: rect.top - yOffset,
             left: xOffset + index * rect.width
         }
         storeItemPostionList.value.push(obj);
@@ -322,15 +333,15 @@ const initGrassList = () => {
 
 <style lang="scss" scoped>
 .game-container {
-    // background-color: #c3fe8b;
-    overflow-y: auto;
-    /* 隐藏滚动条 */
+    // overflow-y: auto;
     scrollbar-width: none;
-    /* firefox */
     -ms-overflow-style: none;
-    /* IE 10+ */
+    overflow: scroll;
     background-color: #c3fe8b;
+    min-height: 875px;
     height: 100%;
+    // height: 100vh;
+
 
     &::-webkit-scrollbar {
         display: none;
@@ -340,6 +351,7 @@ const initGrassList = () => {
     .game-content {
         width: 500px;
         position: relative;
+        position: absolute;
 
         .remove-card-section {
             position: absolute;
