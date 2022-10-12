@@ -134,26 +134,22 @@ const state = reactive({
         {
             cardNum: 3,
             layerNum: 2,
-            trap: false,
-            delNode: true,
+            trap: false
         }, {
             cardNum: 5,
             layerNum: 4,
-            trap: false,
-            delNode: true,
+            trap: false
         }, {
             cardNum: 8,
             layerNum: 6,
-            trap: false,
-            delNode: true,
+            trap: false
         }, {
             cardNum: 10,
             layerNum: 8,
-            trap: false,
-            delNode: true,
+            trap: false
         }
     ],
-    currentLevel: 0,
+    currentLevel: 2,
     currentDate: '- 10月10日 -'
 })
 const musicEnable = ref(false);

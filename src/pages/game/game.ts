@@ -69,9 +69,9 @@ export default function initGame(config: GameConfig): Game {
         const isTrap = trap && floor(random(0, 100)) !== 50;
         let shuffleCardImgArr = shuffle(cardImgArr);
         itemList = [];
-        timer = setInterval(() => {
-            checkSelectedNodes();
-        }, 500);
+        // timer = setInterval(() => {
+        //     checkSelectedNodes();
+        // }, 800);
 
         // 生成节点池
         const itemTypes = new Array(cardNum).fill(0).map((_, index) => index + 1);
@@ -152,12 +152,13 @@ export default function initGame(config: GameConfig): Game {
             clearInterval(timer);
             return;
         }
+        checkSelectedNodes();
         // 为了动画效果添加延迟
         setTimeout(() => {
             card.state = 2;
             card.id = card.id + '-click';
             preNode.value = card;
-            nodes.value[card.nodeIndex] = card;
+            nodes[card.nodeIndex] = card;
         }, 410);
         histroyList.value.push(card);
         // console.log('消除的个数:' + histroyList.value.length);
@@ -174,20 +175,22 @@ export default function initGame(config: GameConfig): Game {
                 const secondIndex = selectedNodes.value.findIndex(
                     (o) => o.id === selectedSomeNode[1].id
                 );
-                selectedNodes.value.splice(secondIndex + 1, 0, card);
-                selectedNodes.value.splice(secondIndex - 1, 3);
                 preNode.value = null;
-                // 判断是否已经清空节点，即是否胜利
-                if (nodes.value.every((o) => o.state > 0) &&
+                selectedNodes.value.splice(secondIndex + 1, 0, card);
+                setTimeout(() => {
+                    selectedNodes.value.splice(secondIndex - 1, 3);
+                    // 判断是否已经清空节点，即是否胜利
+                    if (nodes.value.every((o) => o.state > 0) &&
                         removeList.value.length === 0 &&
                         selectedNodes.value.length === 0
-                ) {
-                    removeFlag.value = true;
-                    backFlag.value = true;
-                    events.winCallback && events.winCallback();
-                } else {
-                    events.dropCallback && events.dropCallback();
-                }
+                    ) {
+                        removeFlag.value = true;
+                        backFlag.value = true;
+                        events.winCallback && events.winCallback();
+                    } else {
+                        events.dropCallback && events.dropCallback();
+                    }
+                }, 100);
             }, 420);
         } else {
             setTimeout(() => {
@@ -240,15 +243,16 @@ export default function initGame(config: GameConfig): Game {
             }
         })
         if (bool) {
-            let typeIndex = 0;
-            for (let i = 0; i < selectedNodes.length; i++) {
-                if (imgType === selectedNodes[i].type) {
-                    typeIndex = i;
-                    break;
-                }
-            }
+            // let typeIndex = 0;
+            // for (let i = 0; i < selectedNodes.length; i++) {
+            //     if (imgType === selectedNodes[i].type) {
+            //         typeIndex = i;
+            //         break;
+            //     }
+            // }
+            // selectedNodes.value.splice(typeIndex, 3);
             // console.log('误差校检中执行了3消');
-            selectedNodes.value.splice(typeIndex, 3);
+            selectedNodes.value = selectedNodes.value.filter(s => s.type !== imgType);
         }
     }
     /**
