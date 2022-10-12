@@ -1,5 +1,5 @@
 <template>
-    <div :ref="(el: any) => {setCardRef(el)}" class="card-container flex-c" :data-state="node.state"
+    <div :ref="(el: any) => {setCardRef(el)}" class="card-container flex-c" :data-id="node.id" :data-state="node.state"
         :style="isDock?{}:{ position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px` }"
         @click="cardTapAction">
         <div class="card-section">

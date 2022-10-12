@@ -6,6 +6,7 @@ export interface Game {
 	removeList: Ref<CardNode[]>;
 	removeFlag: Ref<boolean>;
 	backFlag: Ref<boolean>;
+    shuffleFlag: Ref<boolean>;
 	selectCardHandler: (node: CardNode) => void;
     selectRemoveCardHandler: (node: CardNode) => void;
 	shuffleCardListHandler: () => void;

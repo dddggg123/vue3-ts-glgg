@@ -43,13 +43,13 @@
                     </div>
                 </div>
                 <div class="btn-section">
-                    <button :disabled="removeFlag" @click="removeThreeCardHandler" class="btn-item flex-c">
+                    <button :disabled="removeFlag" @click="removeThreeCardHandler" class="btn-item flex-c" :class="{'forbid': removeFlag}">
                         <span class="btn-title">移出</span>
                     </button>
-                    <button :disabled="backFlag" @click="rollbackOneCardHandler" class="btn-item flex-c">
+                    <button :disabled="backFlag" @click="rollbackOneCardHandler" class="btn-item flex-c" :class="{'forbid': backFlag}">
                         <span class="btn-title">回退</span>
                     </button>
-                    <button @click="shuffleCardListHandler" class="btn-item flex-c">
+                    <button :disabled="shuffleFlag" @click="shuffleCardListHandler" class="btn-item flex-c" :class="{'forbid': shuffleFlag}">
                         <span class="btn-title">打乱</span>
                     </button>
                 </div>
@@ -128,7 +128,7 @@ const state = reactive({
     ] as Array<grassObj>,
     levelConfig: [
         {
-            cardNum: 4,
+            cardNum: 3,
             layerNum: 2,
             trap: false,
         }, {
@@ -221,6 +221,9 @@ const successModalTapHandler = (type: string) => {
                 } else {
                     state.currentLevel += 1;
                 }
+                removeFlag.value = false;
+                backFlag.value = false;
+                shuffleFlag.value = false;
                 initCardList(state.levelConfig[state.currentLevel]);
                 break;
             case 'back':
@@ -236,6 +239,9 @@ const failModalTapHandler = (type: string) => {
         failModal.value = false;
         switch (type) {
             case 'restart':
+            removeFlag.value = false;
+                backFlag.value = false;
+                shuffleFlag.value = false;
                 initCardList(state.levelConfig[state.currentLevel]);
                 break;
             case 'back':
@@ -265,6 +271,7 @@ const {
     removeFlag,
     removeList,
     backFlag,
+    shuffleFlag,
     selectCardHandler,
     selectRemoveCardHandler,
     rollbackOneCardHandler,
@@ -524,6 +531,12 @@ const initGrassList = () => {
                         color: #fff;
                         font-size: 17px;
                     }
+                }
+
+                .forbid {
+                    background-color: gray;
+                    border-bottom: 5px #8a8a8a solid;
+                    pointer-events: none;
                 }
             }
 
