@@ -330,6 +330,7 @@ const initGrassList = () => {
     -ms-overflow-style: none;
     /* IE 10+ */
     background-color: #c3fe8b;
+    height: 100%;
 
     &::-webkit-scrollbar {
         display: none;
