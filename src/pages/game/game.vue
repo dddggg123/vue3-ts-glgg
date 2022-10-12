@@ -149,7 +149,7 @@ const state = reactive({
             trap: false
         }
     ],
-    currentLevel: 2,
+    currentLevel: 0,
     currentDate: '- 10月10日 -'
 })
 const musicEnable = ref(false);
