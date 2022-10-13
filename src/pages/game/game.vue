@@ -18,7 +18,7 @@
                 </div>
             </div>
             <div ref="containerRef" class="game-card-section">
-                <div v-for="(item, index) in state.grassList" :key="index" class="grass-item">
+                <div v-for="(item, index) in state.grassList" :key="item.id" class="grass-item">
                     <img :src="item.url" class="grass-img">
                 </div>
                 <template v-for="(item, index) in nodes" :key="item.id">
@@ -96,7 +96,8 @@ import { showSuccessAnimation, getCurrentDate } from '../../utils/util';
 import { useRouter } from 'vue-router';
 
 type grassObj = {
-    url: string
+    url: string,
+    id: string
 }
 
 type positionObj = {
@@ -333,11 +334,13 @@ const initGrassList = () => {
     for (let index = 0; index < 49; index++) {
         if (index % 2 == 0) {
             state.grassList.push({
-                url: Grass1
+                url: Grass1,
+                id: 'grass-' + index 
             });
         } else {
             state.grassList.push({
-                url: Grass2
+                url: Grass2,
+                id: 'grass-' + index 
             });
         }
     }
