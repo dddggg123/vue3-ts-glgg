@@ -156,9 +156,9 @@ export default function initGame(config: GameConfig): Game {
 		// 为了动画效果添加延迟
 		setTimeout(() => {
 			card.state = 2;
-            if (card.id.split('_')[1] == 'click') {
-                card.id = card.id + '-click';
-            }
+			if (card.id.split("_")[1] == "click") {
+				card.id = card.id + "-click";
+			}
 			preNode.value = card;
 			nodes.value[card.nodeIndex] = card;
 		}, 210);
@@ -184,18 +184,6 @@ export default function initGame(config: GameConfig): Game {
 					//     selectedNodes.value.splice(secondIndex - 1, 1)
 					// }
 					delteSelectedThreeSameNodes();
-					// 判断是否已经清空节点，即是否胜利
-					if (
-						nodes.value.every((o) => o.state > 0) &&
-						removeList.value.length === 0 &&
-						selectedNodes.value.length === 0
-					) {
-						removeFlag.value = true;
-						backFlag.value = true;
-						events.winCallback && events.winCallback();
-					} else {
-						events.dropCallback && events.dropCallback();
-					}
 				}, 100);
 			}, 220);
 		} else {
@@ -245,8 +233,8 @@ export default function initGame(config: GameConfig): Game {
 		}
 		let bool = false;
 		let imgType = "";
-        // 判断数组中某个type是否出现3次以及以上 
-        // 手动调用 消除误差
+		// 判断数组中某个type是否出现3次以及以上
+		// 手动调用 消除误差
 		Object.keys(typeMap).forEach((key) => {
 			if (typeMap[key] >= 3) {
 				bool = true;
@@ -256,7 +244,7 @@ export default function initGame(config: GameConfig): Game {
 		if (bool) {
 			let count = 0;
 			let arr: CardNode[] = [];
-            // 这里将出现三次的card放到辅助数组中 用于三消
+			// 这里将出现三次的card放到辅助数组中 用于三消
 			for (let i = 0; i < selectedNodes.value.length; i++) {
 				if (imgType === selectedNodes.value[i].type) {
 					arr.push(selectedNodes.value[i]);
@@ -267,7 +255,7 @@ export default function initGame(config: GameConfig): Game {
 				}
 			}
 			// 这里取两个数组的补集
-            // 相当于三消
+			// 相当于三消
 			selectedNodes.value = selectedNodes.value.reduce(function (
 				pre: CardNode[],
 				cur
@@ -279,6 +267,19 @@ export default function initGame(config: GameConfig): Game {
 			},
 			[]);
 			// console.log("误差校检中执行了3消");
+			// 判断是否已经清空节点，即是否胜利
+			if (
+				nodes.value.every((o) => o.state > 0) &&
+				removeList.value.length === 0 &&
+				selectedNodes.value.length === 0
+			) {
+				removeFlag.value = true;
+				backFlag.value = true;
+				shuffleFlag.value = true;
+				events.winCallback && events.winCallback();
+			} else {
+				events.dropCallback && events.dropCallback();
+			}
 		}
 	};
 	/**
