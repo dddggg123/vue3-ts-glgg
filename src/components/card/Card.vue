@@ -1,6 +1,6 @@
 <template>
     <div :ref="(el: any) => {setCardRef(el)}" class="card-container flex-c" :data-id="node.id" :data-state="node.state"
-        :style="isDock?{}:{ position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px` }"
+        :style="isDock?{}:{ position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px`}"
         @click="cardTapAction">
         <div class="card-section">
             <div class="card-content flex-c">
@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { computed, VNodeRef, ref } from 'vue';
 import type { CardNode, GameConfig } from "../../types/type";
+import { throttle } from "lodash-es";
 
 interface Props {
     node: CardNode
@@ -44,9 +45,20 @@ const isForbid = computed(() => {
 
 const cardTapAction = () => {
     if (isForbid.value) return;
+    throttleCardTapAction();
+}
+
+/**
+ * 这里加一个节流函数
+ * 防止点击过快 增大动画延时误差
+ */
+const throttleCardTapAction = throttle(() => {
     node.nodeIndex = nodeIndex;
     emit('cardTap', node);
-}
+}, 500, {
+    leading: true,
+    trailing: false
+})
 
 const storeRef = ref<HTMLElement | undefined>()
 
@@ -72,7 +84,7 @@ const px2rem = (px: string) => {
     background-color: #5d731a;
     border-radius: 3px;
     cursor: pointer;
-    transition: all .4s ease-in-out;
+    transition: all .2s ease-in-out;
 
     .card-section {
         width: 100%;
