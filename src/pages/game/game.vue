@@ -33,7 +33,7 @@
                     <div ref="storeRef" class="game-store flex-l">
                         <template v-if="selectedNodes.length">
                             <template v-for="(item, index) in selectedNodes" :key="item.id">
-                                <Card :nodeIndex="index" v-if="item.state === 2" is-dock :node="item"></Card>
+                                <CardStore :nodeIndex="index" :position="state.storePosition" :node="item"></CardStore>
                             </template>
                         </template>
                         <template v-else>
@@ -85,6 +85,7 @@
 
 <script setup lang="ts">
 import Card from '@/components/card/Card.vue';
+import CardStore from '@/components/card/CardStore.vue';
 import ModalSuccess from '@/components/modal/ModalSuccess.vue';
 import ModalFail from '@/components/modal/ModalFail.vue';
 import type { CardNode } from "../../types/type";
@@ -150,7 +151,17 @@ const state = reactive({
         }
     ],
     currentLevel: 0,
-    currentDate: '- 10月10日 -'
+    currentDate: '- 10月10日 -',
+    storePosition: {
+        left: 0,
+        top: 0,
+        width: 0
+    },
+    removePostion: {
+        left: 0,
+        top: 0,
+        width: 0
+    }
 })
 const musicEnable = ref(false);
 
@@ -262,6 +273,8 @@ const calcStoreItemPostion = () => {
     const xOffset = (screenRef.value.getBoundingClientRect().width - storeRef.value.getBoundingClientRect().width) / 2;
     const yOffset = (window.innerHeight - screenRef.value.getBoundingClientRect().height) / 2;
     // const xOffset = storeRef.value.getBoundingClientRect().left;
+    let top = 0;
+    let width = 0;
     storeItemRefs.forEach((item, index) => {
         let rect: DOMRect = item.getBoundingClientRect();
         let obj = {
@@ -269,7 +282,14 @@ const calcStoreItemPostion = () => {
             left: xOffset + index * rect.width
         }
         storeItemPostionList.value.push(obj);
+        top = rect.top - yOffset;
+        width = rect.width;
     })
+    state.storePosition = {
+        top: top,
+        left: xOffset,
+        width: width
+    }
 }
 
 const {
@@ -303,8 +323,8 @@ onMounted(() => {
     initGrassList();
     state.currentDate = '- ' + getCurrentDate() + ' -';
     nextTick(() => {
-        initCardList();
         calcStoreItemPostion();
+        initCardList();
     })
 })
 
