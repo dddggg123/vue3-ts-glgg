@@ -56,6 +56,7 @@ export default function initGame(config: GameConfig): Game {
 
     const initCardList = (config?: GameConfig | null) => {
         const { cardNum, layerNum, trap } = { ...initConfig, ...config };
+        clearInterval(timer);
         histroyList.value = [];
         backFlag.value = false;
         removeFlag.value = false;
@@ -149,10 +150,8 @@ export default function initGame(config: GameConfig): Game {
     const selectCardHandler = (card: CardNode) => {
         // console.log('我点击的节点:' + JSON.stringify(card));
         if (selectedNodes.value.length === 7) {
-            clearInterval(timer);
             return;
         }
-        // checkSelectedNodes();
         // 为了动画效果添加延迟
         setTimeout(() => {
             card.state = 2;
