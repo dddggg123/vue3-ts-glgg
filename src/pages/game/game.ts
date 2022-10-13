@@ -156,7 +156,9 @@ export default function initGame(config: GameConfig): Game {
 		// 为了动画效果添加延迟
 		setTimeout(() => {
 			card.state = 2;
-			// card.id = card.id + '-click';
+            if (card.id.split('_')[1] == 'click') {
+                card.id = card.id + '-click';
+            }
 			preNode.value = card;
 			nodes.value[card.nodeIndex] = card;
 		}, 210);
