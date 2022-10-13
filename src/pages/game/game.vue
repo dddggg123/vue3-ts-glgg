@@ -32,9 +32,9 @@
                 <div class="game-store-content">
                     <div ref="storeRef" class="game-store flex-l">
                         <template v-if="selectedNodes.length">
-                            <template v-for="(item, index) in selectedNodes" :key="item.id">
-                                <CardStore :nodeIndex="index" :position="state.storePosition" :node="item"></CardStore>
-                            </template>
+                                <template v-for="(item, index) in selectedNodes" :key="item.id">
+                                    <Card :nodeIndex="index" v-if="item.state === 2" is-dock :node="item"></Card>
+                                </template>
                         </template>
                         <template v-else>
                             <div :ref="setStoreItemRefs" class="store-item" :key="item"
@@ -85,7 +85,6 @@
 
 <script setup lang="ts">
 import Card from '@/components/card/Card.vue';
-import CardStore from '@/components/card/CardStore.vue';
 import ModalSuccess from '@/components/modal/ModalSuccess.vue';
 import ModalFail from '@/components/modal/ModalFail.vue';
 import type { CardNode } from "../../types/type";
@@ -94,9 +93,7 @@ import { ref, onMounted, reactive, onUnmounted, nextTick } from 'vue';
 import Grass1 from '@/assets/icons/grass1.png';
 import Grass2 from '@/assets/icons/grass2.png';
 import { showSuccessAnimation, getCurrentDate } from '../../utils/util';
-import windowResize from '../../utils/resize';
 import { useRouter } from 'vue-router';
-import { react } from '@babel/types';
 
 type grassObj = {
     url: string
@@ -564,7 +561,7 @@ const initGrassList = () => {
 
                 .forbid {
                     background-color: gray;
-                    border-bottom: 5px #8a8a8a solid;
+                    border-bottom: 5px #666 solid;
                     pointer-events: none;
                 }
             }

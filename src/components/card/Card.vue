@@ -55,7 +55,7 @@ const cardTapAction = () => {
 const throttleCardTapAction = throttle(() => {
     node.nodeIndex = nodeIndex;
     emit('cardTap', node);
-}, 500, {
+}, 1000, {
     leading: true,
     trailing: false
 })
@@ -66,14 +66,6 @@ const setCardRef = (el: undefined | HTMLElement) => {
     node.ref = el;
     // storeRef.value = el;
     // console.log(node.ref?.style);
-}
-
-const px2rem = (px: string) => {
-    if (/%/ig.test(px)) { // 有百分号%，特殊处理，表述pc是一个有百分号的数，比如：90%
-        return px
-    } else {
-        return (parseFloat(px) / 17) + 'rem' // 这里的37.5，和rootValue值对应
-    }
 }
 </script>
 
