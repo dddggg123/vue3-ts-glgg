@@ -158,6 +158,7 @@ export default function initGame(config: GameConfig): Game {
             events.clickCallback && events.clickCallback(card);
             setTimeout(() => {
                 card.state = 2;
+                preNode.value = card;
                 // 判断是否有可以消除的节点
                 const selectedSomeNode = selectedNodes.value.filter(
                     (s) => s.type === card.type
