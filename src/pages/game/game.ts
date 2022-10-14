@@ -193,29 +193,26 @@ export default function initGame(config: GameConfig): Game {
 						setTimeout(() => {
 							// delteSelectedThreeSameNodes();
 							for (let i = 0; i < 3; i++) {
+								selectedNodes.value[secondIndex - 1].id =
+									selectedNodes.value[secondIndex - 1].id + "_drop";
 								// const index = selectedNodes.value.findIndex(o => o.type === node.type)
 								selectedNodes.value.splice(secondIndex - 1, 1);
 							}
 							preNode.value = null;
-							// 判断是否已经清空节点，即是否胜利
-							if (
-								nodes.value.every((o) => o.state > 0) &&
-								removeList.value.length === 0 &&
-								selectedNodes.value.length === 0
-							) {
-								removeFlag.value = true;
-								backFlag.value = true;
-								shuffleFlag.value = true;
-								events.winCallback && events.winCallback();
-							} else {
-								events.dropCallback && events.dropCallback();
-							}
+							gameResultHandler();
 							resolve(2);
 						}, 100);
 					});
+				const f5 = () =>
+					new Promise((resolve, reject) => {
+						delteSelectedThreeSameNodes();
+					});
+
 				// 这里使用promise确保顺序执行
 				f3().then((secondIndex: unknown) => {
-					f4(secondIndex as number);
+					f4(secondIndex as number).then(() => {
+						f5();
+					});
 				});
 			}, 220);
 		} else {
@@ -250,79 +247,79 @@ export default function initGame(config: GameConfig): Game {
 		}
 	};
 
-	// const delteSelectedThreeSameNodes = () => {
-	// 	if (selectedNodes.value.length === 0) {
-	// 		return;
-	// 	}
-	// 	type mapObj = {
-	// 		[f: string]: any;
-	// 	};
-	// 	let typesArr = selectedNodes.value.map((value) => value.type);
-	// 	let typeMap: mapObj = {};
-	// 	for (let i = 0; i < typesArr.length; i++) {
-	// 		var item = typesArr[i];
-	// 		if (typeMap[item]) {
-	// 			typeMap[item]++;
-	// 		} else {
-	// 			typeMap[item] = 1;
-	// 		}
-	// 	}
-	// 	let bool = false;
-	// 	let imgType = "";
-	// 	// 判断数组中某个type是否出现3次以及以上
-	// 	// 手动调用 消除误差
-	// 	Object.keys(typeMap).forEach((key) => {
-	// 		if (typeMap[key] >= 3) {
-	// 			bool = true;
-	// 			imgType = key;
-	// 		}
-	// 	});
-	// 	if (bool) {
-	// 		let count = 0;
-	// 		let arr: CardNode[] = [];
-	// 		// 这里将出现三次的card放到辅助数组中 用于三消
-	// 		for (let i = 0; i < selectedNodes.value.length; i++) {
-	// 			if (imgType === selectedNodes.value[i].type) {
-	// 				arr.push(selectedNodes.value[i]);
-	// 				count += 1;
-	// 				if (count === 3) {
-	// 					break;
-	// 				}
-	// 			}
-	// 		}
-	// 		// 这里取两个数组的补集
-	// 		// 相当于三消
-	// 		selectedNodes.value = selectedNodes.value.reduce(function (
-	// 			pre: CardNode[],
-	// 			cur
-	// 		) {
-	// 			if (arr.every((item) => item.id !== cur.id)) {
-	// 				pre.push(cur);
-	// 			}
-	// 			return pre;
-	// 		},
-	// 		[]);
-	// 		// console.log("误差校检中执行了3消");
-	// 		gameResultHandler();
-	// 	}
-	// };
+	const delteSelectedThreeSameNodes = () => {
+		if (selectedNodes.value.length === 0) {
+			return;
+		}
+		type mapObj = {
+			[f: string]: any;
+		};
+		let typesArr = selectedNodes.value.map((value) => value.type);
+		let typeMap: mapObj = {};
+		for (let i = 0; i < typesArr.length; i++) {
+			var item = typesArr[i];
+			if (typeMap[item]) {
+				typeMap[item]++;
+			} else {
+				typeMap[item] = 1;
+			}
+		}
+		let bool = false;
+		let imgType = "";
+		// 判断数组中某个type是否出现3次以及以上
+		// 手动调用 消除误差
+		Object.keys(typeMap).forEach((key) => {
+			if (typeMap[key] >= 3) {
+				bool = true;
+				imgType = key;
+			}
+		});
+		if (bool) {
+			let count = 0;
+			let arr: CardNode[] = [];
+			// 这里将出现三次的card放到辅助数组中 用于三消
+			for (let i = 0; i < selectedNodes.value.length; i++) {
+				if (imgType === selectedNodes.value[i].type) {
+					arr.push(selectedNodes.value[i]);
+					count += 1;
+					if (count === 3) {
+						break;
+					}
+				}
+			}
+			// 这里取两个数组的补集
+			// 相当于三消
+			selectedNodes.value = selectedNodes.value.reduce(function (
+				pre: CardNode[],
+				cur
+			) {
+				if (arr.every((item) => item.id !== cur.id)) {
+					pre.push(cur);
+				}
+				return pre;
+			},
+			[]);
+			// console.log("误差校检中执行了3消");
+			gameResultHandler();
+		}
+	};
 
-	// const gameResultHandler = () => {
-	// 	// 判断是否已经清空节点，即是否胜利
-	// 	if (
-	// 		nodes.value.every((o) => o.state > 0) &&
-	// 		removeList.value.length === 0 &&
-	// 		selectedNodes.value.length === 0
-	// 	) {
-	// 		removeFlag.value = true;
-	// 		backFlag.value = true;
-	// 		shuffleFlag.value = true;
-	// 		events.winCallback && events.winCallback();
-	// 	} else {
-	// 		events.dropCallback && events.dropCallback();
-	// 	}
-	// };
-    
+	const gameResultHandler = () => {
+		// 判断是否已经清空节点，即是否胜利
+		if (
+			nodes.value.every((o) => o.state > 0) &&
+			removeList.value.length === 0 &&
+			selectedNodes.value.length === 0
+		) {
+			removeFlag.value = true;
+			backFlag.value = true;
+			shuffleFlag.value = true;
+			events.winCallback && events.winCallback();
+		} else {
+			events.dropCallback && events.dropCallback();
+		}
+	};
+
 	/**
 	 * card点击事件
 	 * 3个同类型的card移除事件
