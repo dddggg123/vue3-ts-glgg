@@ -45,7 +45,7 @@ const isForbid = computed(() => {
 
 const cardTapAction = () => {
     if (isForbid.value) return;
-    throttleCardTapAction();
+    emit('cardTap', node);
 }
 
 /**
@@ -55,10 +55,7 @@ const cardTapAction = () => {
 const throttleCardTapAction = throttle(() => {
     node.nodeIndex = nodeIndex;
     emit('cardTap', node);
-}, 1000, {
-    leading: true,
-    trailing: false
-})
+}, 500)
 
 const storeRef = ref<HTMLElement | undefined>()
 
@@ -76,7 +73,7 @@ const setCardRef = (el: undefined | HTMLElement) => {
     background-color: #5d731a;
     border-radius: 3px;
     cursor: pointer;
-    transition: all .2s ease-in-out;
+    transition: all .4s ease-in-out;
 
     .card-section {
         width: 100%;
