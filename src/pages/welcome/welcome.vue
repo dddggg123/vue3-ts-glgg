@@ -26,7 +26,7 @@
                     <p @click="startGameAction" class="btn-title flex-c">
                         <span>开始挑战</span>
                     </p>
-                    <p class="version">版本号：1.0.101303</p>
+                    <p class="version">版本号：1.0.101401</p>
                 </div>
             </div>
         </div>
@@ -109,6 +109,7 @@ const audioEndedHandler = () => {
 .welcome-container {
     background-color: #c3fe8b;
     height: 100%;
+    min-height: 875px;
     overflow-y: auto;
     /* 隐藏滚动条 */
     scrollbar-width: none;
