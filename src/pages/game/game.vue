@@ -236,9 +236,6 @@ const successModalTapHandler = (type: string) => {
                 } else {
                     state.currentLevel += 1;
                 }
-                removeFlag.value = false;
-                backFlag.value = false;
-                shuffleFlag.value = false;
                 initCardList(state.levelConfig[state.currentLevel]);
                 break;
             case 'back':
@@ -254,9 +251,6 @@ const failModalTapHandler = (type: string) => {
         failModal.value = false;
         switch (type) {
             case 'restart':
-                removeFlag.value = false;
-                backFlag.value = false;
-                shuffleFlag.value = false;
                 initCardList(state.levelConfig[state.currentLevel]);
                 break;
             case 'back':

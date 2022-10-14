@@ -40,7 +40,6 @@ export default function initGame(config: GameConfig): Game {
 		events = {},
 		...initConfig
 	} = { ...defaultGameConfig, ...config };
-	const histroyList = ref<CardNode[]>([]);
 	const backFlag = ref(false);
 	const removeFlag = ref(false);
 	const shuffleFlag = ref(false);
@@ -55,9 +54,9 @@ export default function initGame(config: GameConfig): Game {
 
 	const initCardList = (config?: GameConfig | null) => {
 		const { cardNum, layerNum, trap } = { ...initConfig, ...config };
-		histroyList.value = [];
 		backFlag.value = false;
 		removeFlag.value = false;
+		shuffleFlag.value = false;
 		removeList.value = [];
 		preNode.value = null;
 		nodes.value = [];
@@ -149,25 +148,37 @@ export default function initGame(config: GameConfig): Game {
 		}
 		// 为了动画效果添加延迟
 		setTimeout(() => {
-			card.state = 2;
-			if (card.id.split("_")[1] == "click") {
-				card.id = card.id + "_click";
-			}
-			preNode.value = card;
-			nodes.value.splice(card.nodeIndex, 1, card);
+			// card.state = 2;
+			// if (card.id.split("_")[1] == "click") {
+			// 	card.id = card.id + "_click";
+			// }
+			// preNode.value = card;
+			// nodes.value.splice(card.nodeIndex, 1, card);
+			const f1 = () =>
+				new Promise((resolve, reject) => {
+					card.state = 2;
+					card.id = card.id + "_click";
+					resolve(1);
+				});
+			const f2 = () =>
+				new Promise((resolve, reject) => {
+					nodes.value.splice(card.nodeIndex, 1, card);
+					resolve(2);
+				});
+			f1().then(() => {
+				f2();
+			});
 		}, 210);
-		histroyList.value.push(card);
-		// console.log('消除的个数:' + histroyList.value.length);
 		// 判断是否有可以消除的节点
 		const selectedSomeNode = selectedNodes.value.filter(
 			(s) => s.type === card.type
 		);
 		events.clickCallback && events.clickCallback(card);
-		if (selectedSomeNode.length === 2) {
+		if (selectedSomeNode.length >= 2) {
 			setTimeout(() => {
 				// nodes.value[card.nodeIndex] = card;
 				// nodes.value = nodes.value.filter(s => s.state === 0 || s.state === 1)
-				const f1 = () =>
+				const f3 = () =>
 					new Promise((resolve, reject) => {
 						// 第二个节点索引
 						const secondIndex = selectedNodes.value.findIndex(
@@ -175,18 +186,36 @@ export default function initGame(config: GameConfig): Game {
 						);
 						preNode.value = null;
 						selectedNodes.value.splice(secondIndex + 1, 0, card);
-						resolve(1);
+						resolve(secondIndex);
 					});
-				const f2 = () =>
+				const f4 = (secondIndex: number) =>
 					new Promise((resolve, reject) => {
 						setTimeout(() => {
-							delteSelectedThreeSameNodes();
+							// delteSelectedThreeSameNodes();
+							for (let i = 0; i < 3; i++) {
+								// const index = selectedNodes.value.findIndex(o => o.type === node.type)
+								selectedNodes.value.splice(secondIndex - 1, 1);
+							}
+							preNode.value = null;
+							// 判断是否已经清空节点，即是否胜利
+							if (
+								nodes.value.every((o) => o.state > 0) &&
+								removeList.value.length === 0 &&
+								selectedNodes.value.length === 0
+							) {
+								removeFlag.value = true;
+								backFlag.value = true;
+								shuffleFlag.value = true;
+								events.winCallback && events.winCallback();
+							} else {
+								events.dropCallback && events.dropCallback();
+							}
 							resolve(2);
 						}, 100);
 					});
 				// 这里使用promise确保顺序执行
-				f1().then(() => {
-					f2();
+				f3().then((secondIndex: unknown) => {
+					f4(secondIndex as number);
 				});
 			}, 220);
 		} else {
@@ -206,6 +235,7 @@ export default function initGame(config: GameConfig): Game {
 				if (selectedNodes.value.length === 7) {
 					removeFlag.value = true;
 					backFlag.value = true;
+					shuffleFlag.value = true;
 					events.loseCallback && events.loseCallback();
 				}
 			}, 220);
@@ -220,78 +250,79 @@ export default function initGame(config: GameConfig): Game {
 		}
 	};
 
-	const delteSelectedThreeSameNodes = () => {
-		if (selectedNodes.value.length === 0) {
-			return;
-		}
-		type mapObj = {
-			[f: string]: any;
-		};
-		let typesArr = selectedNodes.value.map((value) => value.type);
-		let typeMap: mapObj = {};
-		for (let i = 0; i < typesArr.length; i++) {
-			var item = typesArr[i];
-			if (typeMap[item]) {
-				typeMap[item]++;
-			} else {
-				typeMap[item] = 1;
-			}
-		}
-		let bool = false;
-		let imgType = "";
-		// 判断数组中某个type是否出现3次以及以上
-		// 手动调用 消除误差
-		Object.keys(typeMap).forEach((key) => {
-			if (typeMap[key] >= 3) {
-				bool = true;
-				imgType = key;
-			}
-		});
-		if (bool) {
-			let count = 0;
-			let arr: CardNode[] = [];
-			// 这里将出现三次的card放到辅助数组中 用于三消
-			for (let i = 0; i < selectedNodes.value.length; i++) {
-				if (imgType === selectedNodes.value[i].type) {
-					arr.push(selectedNodes.value[i]);
-					count += 1;
-					if (count === 3) {
-						break;
-					}
-				}
-			}
-			// 这里取两个数组的补集
-			// 相当于三消
-			selectedNodes.value = selectedNodes.value.reduce(function (
-				pre: CardNode[],
-				cur
-			) {
-				if (arr.every((item) => item.id !== cur.id)) {
-					pre.push(cur);
-				}
-				return pre;
-			},
-			[]);
-			// console.log("误差校检中执行了3消");
-			gameResultHandler();
-		}
-	};
+	// const delteSelectedThreeSameNodes = () => {
+	// 	if (selectedNodes.value.length === 0) {
+	// 		return;
+	// 	}
+	// 	type mapObj = {
+	// 		[f: string]: any;
+	// 	};
+	// 	let typesArr = selectedNodes.value.map((value) => value.type);
+	// 	let typeMap: mapObj = {};
+	// 	for (let i = 0; i < typesArr.length; i++) {
+	// 		var item = typesArr[i];
+	// 		if (typeMap[item]) {
+	// 			typeMap[item]++;
+	// 		} else {
+	// 			typeMap[item] = 1;
+	// 		}
+	// 	}
+	// 	let bool = false;
+	// 	let imgType = "";
+	// 	// 判断数组中某个type是否出现3次以及以上
+	// 	// 手动调用 消除误差
+	// 	Object.keys(typeMap).forEach((key) => {
+	// 		if (typeMap[key] >= 3) {
+	// 			bool = true;
+	// 			imgType = key;
+	// 		}
+	// 	});
+	// 	if (bool) {
+	// 		let count = 0;
+	// 		let arr: CardNode[] = [];
+	// 		// 这里将出现三次的card放到辅助数组中 用于三消
+	// 		for (let i = 0; i < selectedNodes.value.length; i++) {
+	// 			if (imgType === selectedNodes.value[i].type) {
+	// 				arr.push(selectedNodes.value[i]);
+	// 				count += 1;
+	// 				if (count === 3) {
+	// 					break;
+	// 				}
+	// 			}
+	// 		}
+	// 		// 这里取两个数组的补集
+	// 		// 相当于三消
+	// 		selectedNodes.value = selectedNodes.value.reduce(function (
+	// 			pre: CardNode[],
+	// 			cur
+	// 		) {
+	// 			if (arr.every((item) => item.id !== cur.id)) {
+	// 				pre.push(cur);
+	// 			}
+	// 			return pre;
+	// 		},
+	// 		[]);
+	// 		// console.log("误差校检中执行了3消");
+	// 		gameResultHandler();
+	// 	}
+	// };
 
-	const gameResultHandler = () => {
-		// 判断是否已经清空节点，即是否胜利
-		if (
-			nodes.value.every((o) => o.state > 0) &&
-			removeList.value.length === 0 &&
-			selectedNodes.value.length === 0
-		) {
-			removeFlag.value = true;
-			backFlag.value = true;
-			shuffleFlag.value = true;
-			events.winCallback && events.winCallback();
-		} else {
-			events.dropCallback && events.dropCallback();
-		}
-	};
+	// const gameResultHandler = () => {
+	// 	// 判断是否已经清空节点，即是否胜利
+	// 	if (
+	// 		nodes.value.every((o) => o.state > 0) &&
+	// 		removeList.value.length === 0 &&
+	// 		selectedNodes.value.length === 0
+	// 	) {
+	// 		removeFlag.value = true;
+	// 		backFlag.value = true;
+	// 		shuffleFlag.value = true;
+	// 		events.winCallback && events.winCallback();
+	// 	} else {
+	// 		events.dropCallback && events.dropCallback();
+	// 	}
+	// };
+    
 	/**
 	 * card点击事件
 	 * 3个同类型的card移除事件
