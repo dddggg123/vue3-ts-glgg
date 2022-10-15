@@ -28,8 +28,8 @@
                         :node="item"></Card>
                 </template>
                 <template v-for="(item, index) in removeList" :key="item.id">
-                    <CardRemove v-if="item.state === 3" :nodeIndex="index" :removeIndex="index" :position="state.removePostion" :node="item"
-                        @cardRemoveTap="selectRemoveCardHandler">
+                    <CardRemove v-if="item.state === 3" :nodeIndex="index" :removeIndex="index"
+                        :position="state.removePostion" :node="item" @cardRemoveTap="selectRemoveCardHandler">
                     </CardRemove>
                 </template>
             </div>
@@ -38,8 +38,8 @@
                     <div ref="storeRef" class="game-store flex-l">
                         <template v-if="selectedNodes.length">
                             <template v-for="(item, index) in selectedNodes" :key="item.id">
-                                <CardStore v-if="item.state === 2" :storeIndex="index" :nodeIndex="index" :position="state.storePosition"
-                                    :node="item"></CardStore>
+                                <CardStore v-if="item.state === 2" :storeIndex="index" :nodeIndex="index"
+                                    :position="state.storePosition" :node="item"></CardStore>
                             </template>
                         </template>
                         <template v-else>
@@ -146,11 +146,11 @@ const state = reactive({
             layerNum: 4,
             trap: false
         }, {
-            cardNum: 8,
+            cardNum: 7,
             layerNum: 6,
             trap: false
         }, {
-            cardNum: 10,
+            cardNum: 9,
             layerNum: 8,
             trap: false
         }

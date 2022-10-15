@@ -278,6 +278,8 @@ export default function initGame(config: GameConfig): Game {
                         row,
                         column,
                     };
+                } else if (nodesArr[indexPath].state === 3) {
+                    nodeItem = nodesArr[indexPath];
                 } else {
                     nodeItem = nodesArr[indexPath];
                 }
