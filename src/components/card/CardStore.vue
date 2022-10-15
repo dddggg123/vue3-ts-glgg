@@ -1,6 +1,6 @@
 <template>
-    <div :ref="(el: any) => {setCardRef(el)}" class="card-container flex-c" :data-id="node.id" :data-state="node.state"
-        :style="{ position: 'absolute', zIndex: node.zIndex, top: `${node.top}px`, left: `${node.left}px`}"
+    <div :ref="(el: any) => {setCardRef(el)}" class="card-store-container flex-c" :data-id="node.id" :data-state="node.state"
+        :style="cardStyle"
         @click="cardTapAction">
         <div class="card-section">
             <div class="card-content flex-c">
@@ -13,13 +13,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, CSSProperties } from 'vue';
 import type { CardNode } from "../../types/type";
+
+type positionObj = {
+    left: number,
+    top: number,
+    width: number
+}
 
 interface Props {
     node: CardNode
     isDock?: boolean,
-    nodeIndex: number
+    nodeIndex: number,
+    position: positionObj,
+    storeIndex: number
 }
 
 const props = defineProps<Props>();
@@ -42,6 +50,12 @@ const isForbid = computed(() => {
     return props.node.parents.length > 0 ? props.node.parents.some(o => o.state < 2) : false
 })
 
+const cardStyle = computed(() => {
+    return {
+        position: 'absolute', zIndex: node.zIndex, top: `${props.position.top}px`, left: `${props.position.left + props.position.width * props.storeIndex}px`
+    } as CSSProperties
+})
+
 const cardTapAction = () => {
     if (isForbid.value) return;
     emit('cardTap', node);
@@ -49,19 +63,16 @@ const cardTapAction = () => {
 
 const setCardRef = (el: undefined | HTMLElement) => {
     node.ref = el;
-    // storeRef.value = el;
-    // console.log(node.ref?.style);
 }
 </script>
 
 <style lang="scss" scoped>
-.card-container {
+.card-store-container {
     width: 50px;
     height: 50px;
     background-color: #5d731a;
     border-radius: 3px;
-    cursor: pointer;
-    transition: all .4s ease-in-out;
+    transition: all .2s ease-in-out;
 
     .card-section {
         width: 100%;
@@ -94,29 +105,6 @@ const setCardRef = (el: undefined | HTMLElement) => {
                 height: 40px;
             }
         }
-    }
-}
-
-.card-dock {
-    animation: shake 0.4s ease-in-out;
-}
-
-@keyframes shake {
-
-    0% {
-        transform: scale(1);
-    }
-
-    25% {
-        transform: scale(1.1);
-    }
-
-    50% {
-        transform: scale(1.2);
-    }
-
-    75% {
-        transform: scale(1.1);
     }
 }
 </style>

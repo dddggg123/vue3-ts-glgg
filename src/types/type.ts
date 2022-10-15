@@ -42,6 +42,8 @@ export interface GameConfig {
 
 interface GameEvents {
 	clickCallback?: (card: CardNode) => void;
+    removeCallback?: () => void;
+    rollCallback?: (card: CardNode) => void;
 	dropCallback?: () => void;
 	winCallback?: () => void;
 	loseCallback?: () => void;

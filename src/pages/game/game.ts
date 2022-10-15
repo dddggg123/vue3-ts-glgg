@@ -139,7 +139,6 @@ export default function initGame(config: GameConfig): Game {
         nodes.value.forEach((o) => {
             o.state = o.parents.every((p) => p.state > 0) ? 1 : 0;
         });
-        console.log("生成的元素个数:" + nodes.value.length);
     };
 
     /**
@@ -155,10 +154,10 @@ export default function initGame(config: GameConfig): Game {
             historyList.value.pop();
             return;
         } else {
+            preNode.value = card;
             events.clickCallback && events.clickCallback(card);
             setTimeout(() => {
                 card.state = 2;
-                preNode.value = card;
                 // 判断是否有可以消除的节点
                 const selectedSomeNode = selectedNodes.value.filter(
                     (s) => s.type === card.type
@@ -196,69 +195,14 @@ export default function initGame(config: GameConfig): Game {
     };
 
     const selectRemoveCardHandler = (card: CardNode) => {
-        const index = removeList.value.findIndex((o) => o.id === card.id);
-        if (index > -1) {
-            removeList.value.splice(index, 1);
-            selectCardHandler(card);
-        }
+        selectCardHandler(card);
+        setTimeout(() => {
+            const index = removeList.value.findIndex((o) => o.id === card.id);
+            if (index > -1) {
+                removeList.value.splice(index, 1);
+            }
+        }, 410);
     };
-
-    const delteSelectedThreeSameNodes = () => {
-        if (selectedNodes.value.length === 0) {
-            return;
-        }
-        type mapObj = {
-            [f: string]: any;
-        };
-        let typesArr = selectedNodes.value.map((value) => value.type);
-        let typeMap: mapObj = {};
-        for (let i = 0; i < typesArr.length; i++) {
-            var item = typesArr[i];
-            if (typeMap[item]) {
-                typeMap[item]++;
-            } else {
-                typeMap[item] = 1;
-            }
-        }
-        let bool = false;
-        let imgType = "";
-        // 判断数组中某个type是否出现3次以及以上
-        // 手动调用 消除误差
-        Object.keys(typeMap).forEach((key) => {
-            if (typeMap[key] >= 3) {
-                bool = true;
-                imgType = key;
-            }
-        });
-        if (bool) {
-            let count = 0;
-            let arr: CardNode[] = [];
-            // 这里将出现三次的card放到辅助数组中 用于三消
-            for (let i = 0; i < selectedNodes.value.length; i++) {
-                if (imgType === selectedNodes.value[i].type) {
-                    arr.push(selectedNodes.value[i]);
-                    count += 1;
-                    if (count === 3) {
-                        break;
-                    }
-                }
-            }
-            // 这里取两个数组的补集
-            // 相当于三消
-            selectedNodes.value = selectedNodes.value.reduce(function (
-                pre: CardNode[],
-                cur
-            ) {
-                if (arr.every((item) => item.id !== cur.id)) {
-                    pre.push(cur);
-                }
-                return pre;
-            },
-                []);
-            // console.log("误差校检中执行了3消");
-            gameResultHandler();
-        }
-    }
 
     const gameResultHandler = () => {
         // 判断是否已经清空节点，即是否胜利
@@ -364,12 +308,17 @@ export default function initGame(config: GameConfig): Game {
     const removeThreeCardHandler = () => {
         if (selectedNodes.value.length < 3) return;
         removeFlag.value = true;
-        preNode.value = null;
-        for (let i = 0; i < 3; i++) {
-            const node = selectedNodes.value.shift();
-            if (!node) return;
-            removeList.value.push(node);
-        }
+        events.removeCallback && events.removeCallback();
+        setTimeout(() => {
+            for (let i = 0; i < 3; i++) {
+                const node: CardNode = selectedNodes.value.shift();
+                node.state = 3;
+                if (!node) return;
+                removeList.value.push(node);
+            }
+            preNode.value = selectedNodes.value[selectedNodes.value.length - 1];
+            console.log(preNode.value);
+        }, 410);
     };
     /**
      *  回退1个card事件
@@ -377,11 +326,16 @@ export default function initGame(config: GameConfig): Game {
     const rollbackOneCardHandler = () => {
         const node = preNode.value;
         if (!node) return;
-        preNode.value = null;
-        backFlag.value = true;
-        node.state = 0;
-        const index = selectedNodes.value.findIndex((o) => o.id === node.id);
-        selectedNodes.value.splice(index, 1);
+        events.rollCallback && events.rollCallback(node);
+        setTimeout(() => {
+            // const card = selectedNodes.value[selectedNodes.value.length - 1];
+            node.state = 1;
+            nodes.value[node.nodeIndex] = node;
+            const index = selectedNodes.value.findIndex((o) => o.id === node.id);
+            selectedNodes.value.splice(index, 1);
+            preNode.value = null;
+            backFlag.value = true;
+        }, 410);
     };
 
     return {

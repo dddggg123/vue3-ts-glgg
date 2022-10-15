@@ -1,7 +1,7 @@
 <template>
     <div class="game-container flex-c">
         <div ref="screenRef" class="game-content">
-            <div class="game-header-section flex-c">
+            <div ref="headerSectionRef" class="game-header-section flex-c">
                 <!-- <p class="game-title">果了个果</p> -->
                 <div class="date-section">
                     <span class="date">{{state.currentDate}}</span>
@@ -17,7 +17,7 @@
                     </template>
                 </div>
             </div>
-            <div ref="containerRef" class="game-card-section">
+            <div ref="cardSectionRef" class="game-card-section">
                 <div v-for="(item, index) in state.grassList" :key="item.id" class="grass-item">
                     <img :src="item.url" class="grass-img">
                 </div>
@@ -27,14 +27,20 @@
                     <Card :nodeIndex="index" v-if="item.state === 0 || item.state === 1" @cardTap="selectCardHandler"
                         :node="item"></Card>
                 </template>
+                <template v-for="(item, index) in removeList" :key="item.id">
+                    <CardRemove v-if="item.state === 3" :nodeIndex="index" :removeIndex="index" :position="state.removePostion" :node="item"
+                        @cardTap="selectRemoveCardHandler">
+                    </CardRemove>
+                </template>
             </div>
-            <div class="game-store-section">
+            <div ref="storeSectionRef" class="game-store-section">
                 <div class="game-store-content">
                     <div ref="storeRef" class="game-store flex-l">
                         <template v-if="selectedNodes.length">
-                                <template v-for="(item, index) in selectedNodes" :key="item.id">
-                                    <Card :nodeIndex="index" v-if="item.state === 2" is-dock :node="item"></Card>
-                                </template>
+                            <template v-for="(item, index) in selectedNodes" :key="item.id">
+                                <CardStore v-if="item.state === 2" :storeIndex="index" :nodeIndex="index" :position="state.storePosition"
+                                    :node="item"></CardStore>
+                            </template>
                         </template>
                         <template v-else>
                             <div :ref="setStoreItemRefs" class="store-item" :key="item"
@@ -60,10 +66,6 @@
             <ModalSuccess :isLast="state.currentLevel == state.levelConfig.length - 1" :modal="successModal"
                 @successModalTap="successModalTapHandler"></ModalSuccess>
             <ModalFail :modal="failModal" @failModalTap="failModalTapHandler"></ModalFail>
-            <div class="remove-card-section flex-l">
-                <Card :nodeIndex="index" v-for="(item, index) in removeList" :key="item.id" :node="item" is-dock
-                    @cardTap="selectRemoveCardHandler"></Card>
-            </div>
         </div>
         <audio ref="clickAudioRef" style="display: none;" preload="auto" controls>
             <source src="@/assets/audios/click.mp3" />
@@ -85,6 +87,8 @@
 
 <script setup lang="ts">
 import Card from '@/components/card/Card.vue';
+import CardStore from '@/components/card/CardStore.vue';
+import CardRemove from '@/components/card/CardRemove.vue';
 import ModalSuccess from '@/components/modal/ModalSuccess.vue';
 import ModalFail from '@/components/modal/ModalFail.vue';
 import type { CardNode } from "../../types/type";
@@ -94,6 +98,7 @@ import Grass1 from '@/assets/icons/grass1.png';
 import Grass2 from '@/assets/icons/grass2.png';
 import { showSuccessAnimation, getCurrentDate } from '../../utils/util';
 import { useRouter } from 'vue-router';
+import { cardWidth } from '@/utils/const'
 
 type grassObj = {
     url: string,
@@ -107,8 +112,10 @@ type positionObj = {
 
 const router = useRouter()
 const screenRef = ref()
+const storeSectionRef = ref()
 const storeRef = ref()
-const containerRef = ref<HTMLElement | undefined>()
+const headerSectionRef = ref()
+const cardSectionRef = ref()
 const clickAudioRef = ref<HTMLAudioElement | undefined>()
 const dropAudioRef = ref<HTMLAudioElement | undefined>()
 const winAudioRef = ref<HTMLAudioElement | undefined>()
@@ -158,7 +165,7 @@ const state = reactive({
     removePostion: {
         left: 0,
         top: 0,
-        width: 0
+        width: cardWidth
     }
 })
 const musicEnable = ref(false);
@@ -193,12 +200,23 @@ const confirmNodeStyle = (card: CardNode) => {
     // card = { ...card, ...{ top: storeItemPostionList.value[selectedNodes.value.length].top, left: storeItemPostionList.value[selectedNodes.value.length].left } }
     const top = storeItemPostionList.value[selectedNodes.value.length].top;
     const left = storeItemPostionList.value[selectedNodes.value.length].left;
-    // console.log(card.ref);
     card.ref?.setAttribute('style', `position: absolute; z-index: ${card.zIndex}; top: ${top}px; left: ${left}px;`);
 }
 
 const dropCardHandler = () => {
     dropAudioRef.value?.play()
+}
+
+const removeCardHandler = () => {
+    for (let i = 0; i < 3; i++) {
+        const card = selectedNodes.value[i];
+        card.ref?.setAttribute('style', `position: absolute; z-index: ${card.zIndex}; top: ${state.removePostion.top}px; left: ${state.removePostion.left + state.removePostion.width * i}px;`);
+    }
+}
+
+const rollCallbackHandler = (pre: CardNode) => {
+    const card = selectedNodes.value[selectedNodes.value.length - 1];
+    card.ref?.setAttribute('style', `position: absolute; z-index: ${pre.zIndex}; top: ${pre.top}px; left: ${pre.left}px;`);
 }
 
 const winHandler = () => {
@@ -284,6 +302,14 @@ const calcStoreItemPostion = () => {
     }
 }
 
+const calcRemoveSectionPosition = () => {
+    // const left = removeRef.value.getBoundingClientRect().left;
+    // const left = (screenRef.value.getBoundingClientRect().width - removeRef.value.getBoundingClientRect().width) / 2;
+    // const top = removeRef.value.getBoundingClientRect().top - (window.innerHeight - screenRef.value.getBoundingClientRect().height) / 2;
+    console.log(screenRef.value.getBoundingClientRect());
+    state.removePostion.top = headerSectionRef.value.getBoundingClientRect().height + cardSectionRef.value.getBoundingClientRect().height - cardWidth;
+}
+
 const {
     nodes,
     selectedNodes,
@@ -298,10 +324,12 @@ const {
     shuffleCardListHandler,
     initCardList,
 } = initGame({
-    container: containerRef,
+    container: cardSectionRef,
     events: {
         clickCallback: clickCardHandler,
         dropCallback: dropCardHandler,
+        removeCallback: removeCardHandler,
+        rollCallback: rollCallbackHandler,
         winCallback: winHandler,
         loseCallback: loseHandler,
     },
@@ -315,6 +343,7 @@ onMounted(() => {
     initGrassList();
     state.currentDate = '- ' + getCurrentDate() + ' -';
     nextTick(() => {
+        calcRemoveSectionPosition();
         calcStoreItemPostion();
         initCardList();
     })
@@ -329,12 +358,12 @@ const initGrassList = () => {
         if (index % 2 == 0) {
             state.grassList.push({
                 url: Grass1,
-                id: 'grass-' + index 
+                id: 'grass-' + index
             });
         } else {
             state.grassList.push({
                 url: Grass2,
-                id: 'grass-' + index 
+                id: 'grass-' + index
             });
         }
     }
@@ -365,8 +394,8 @@ const initGrassList = () => {
 
         .remove-card-section {
             position: absolute;
-            left: 0;
-            bottom: 185px;
+            left: 20px;
+            top: 620px;
             width: 150px;
             height: 50px;
         }
@@ -519,6 +548,7 @@ const initGrassList = () => {
                 box-sizing: content-box;
                 width: 350px;
                 height: 50px;
+                margin-top: 10px;
                 background-color: #965a1c;
                 border: 10px #c1812f solid;
                 border-radius: 5px;
