@@ -31,7 +31,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(['cardTap']);
+const emit = defineEmits(['cardRemoveTap']);
 
 const { node, nodeIndex } = props;
 
@@ -58,7 +58,7 @@ const cardStyle = computed(() => {
 
 const cardTapAction = () => {
     if (isForbid.value) return;
-    emit('cardTap', node);
+    emit('cardRemoveTap', node);
 }
 
 const setCardRef = (el: undefined | HTMLElement) => {
@@ -75,7 +75,7 @@ const setCardRef = (el: undefined | HTMLElement) => {
     background-color: #5d731a;
     border-radius: 3px;
     cursor: pointer;
-    transition: all .4s ease-in-out;
+    transition: all .2s ease-in-out;
 
     .card-section {
         width: 100%;

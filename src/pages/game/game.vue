@@ -29,7 +29,7 @@
                 </template>
                 <template v-for="(item, index) in removeList" :key="item.id">
                     <CardRemove v-if="item.state === 3" :nodeIndex="index" :removeIndex="index" :position="state.removePostion" :node="item"
-                        @cardTap="selectRemoveCardHandler">
+                        @cardRemoveTap="selectRemoveCardHandler">
                     </CardRemove>
                 </template>
             </div>
@@ -215,7 +215,8 @@ const removeCardHandler = () => {
 }
 
 const rollCallbackHandler = (pre: CardNode) => {
-    const card = selectedNodes.value[selectedNodes.value.length - 1];
+    const index = selectedNodes.value.findIndex((o) => o.id === pre.id);
+    const card = selectedNodes.value[index];
     card.ref?.setAttribute('style', `position: absolute; z-index: ${pre.zIndex}; top: ${pre.top}px; left: ${pre.left}px;`);
 }
 

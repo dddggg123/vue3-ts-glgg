@@ -1,7 +1,5 @@
 <template>
-    <div :ref="(el: any) => {setCardRef(el)}" class="card-store-container flex-c" :data-id="node.id" :data-state="node.state"
-        :style="cardStyle"
-        @click="cardTapAction">
+    <div :ref="(el: any) => {setCardRef(el)}" class="card-store-container flex-c" :data-id="node.id" :data-state="node.state" :style="cardStyle">
         <div class="card-section">
             <div class="card-content flex-c">
                 <img class="card-img" :src="imgMapObj[node.type]" :alt="`${node.type}`">
@@ -31,7 +29,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(['cardTap']);
+const emit = defineEmits(['cardStoreTap']);
 
 const { node, nodeIndex } = props;
 
@@ -55,11 +53,6 @@ const cardStyle = computed(() => {
         position: 'absolute', zIndex: node.zIndex, top: `${props.position.top}px`, left: `${props.position.left + props.position.width * props.storeIndex}px`
     } as CSSProperties
 })
-
-const cardTapAction = () => {
-    if (isForbid.value) return;
-    emit('cardTap', node);
-}
 
 const setCardRef = (el: undefined | HTMLElement) => {
     node.ref = el;

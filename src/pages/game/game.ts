@@ -190,18 +190,19 @@ export default function initGame(config: GameConfig): Game {
                     }
                 }
                 clickCount += 1;
-            }, 410);
+            }, 420);
         };
     };
 
     const selectRemoveCardHandler = (card: CardNode) => {
         selectCardHandler(card);
+        // events.clickCallback && events.clickCallback(card);
         setTimeout(() => {
             const index = removeList.value.findIndex((o) => o.id === card.id);
             if (index > -1) {
                 removeList.value.splice(index, 1);
             }
-        }, 410);
+        }, 210);
     };
 
     const gameResultHandler = () => {
@@ -316,9 +317,13 @@ export default function initGame(config: GameConfig): Game {
                 if (!node) return;
                 removeList.value.push(node);
             }
-            preNode.value = selectedNodes.value[selectedNodes.value.length - 1];
+            if (selectedNodes.value.length) {
+                preNode.value = selectedNodes.value[selectedNodes.value.length - 1];
+            } else {
+                preNode.value = null;
+            }
             console.log(preNode.value);
-        }, 410);
+        }, 210);
     };
     /**
      *  回退1个card事件
@@ -326,16 +331,17 @@ export default function initGame(config: GameConfig): Game {
     const rollbackOneCardHandler = () => {
         const node = preNode.value;
         if (!node) return;
-        events.rollCallback && events.rollCallback(node);
+        // events.rollCallback && events.rollCallback(node);
         setTimeout(() => {
             // const card = selectedNodes.value[selectedNodes.value.length - 1];
             node.state = 1;
-            nodes.value[node.nodeIndex] = node;
-            const index = selectedNodes.value.findIndex((o) => o.id === node.id);
-            selectedNodes.value.splice(index, 1);
+            const index = nodes.value.findIndex((o) => o.id === node.id);
+            nodes.value[index] = node;
+            const index1 = selectedNodes.value.findIndex((o) => o.id === node.id);
+            selectedNodes.value.splice(index1, 1);
             preNode.value = null;
             backFlag.value = true;
-        }, 410);
+        }, 210);
     };
 
     return {
