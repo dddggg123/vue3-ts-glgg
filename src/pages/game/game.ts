@@ -32,8 +32,6 @@ const defaultGameConfig: GameConfig = {
     trap: true,
 };
 
-let itemList: number[] = [];
-
 export default function initGame(config: GameConfig): Game {
     const {
         container,
@@ -53,6 +51,9 @@ export default function initGame(config: GameConfig): Game {
     const size = 50;
     let floorList: number[][] = [];
     let clickCount = 1;
+    let itemList: number[] = [];
+    let leftNodes: CardNode[] = [];
+    let rightNodes: CardNode[] = [];
 
     const initCardList = (config?: GameConfig | null) => {
         const { cardNum, layerNum, trap } = { ...initConfig, ...config };
@@ -60,12 +61,14 @@ export default function initGame(config: GameConfig): Game {
         removeFlag.value = false;
         shuffleFlag.value = false;
         removeList.value = [];
+        selectedNodes.value = [];
         historyList.value = [];
         preNode.value = null;
         nodes.value = [];
         indexSet.clear();
         perFloorNodes = [];
-        selectedNodes.value = [];
+        leftNodes = [];
+        rightNodes = [];
         floorList = [];
         const isTrap = trap && floor(random(0, 100)) !== 50;
         let shuffleCardImgArr = shuffle(cardImgArr);
@@ -81,7 +84,7 @@ export default function initGame(config: GameConfig): Game {
             const len = itemList.length;
             itemList.splice(len - cardNum, len);
         }
-        // console.log('卡牌列表:' + JSON.stringify(itemList));
+
         // 打乱节点
         itemList = shuffle(shuffle(itemList));
         // 初始化各个层级节点
@@ -99,7 +102,9 @@ export default function initGame(config: GameConfig): Game {
         const containerHeight = container!.value!.clientHeight;
         const width = containerWidth / 2;
         const height = containerHeight / 2;
+        const offset = 30;
 
+        // 生成中间部分卡牌
         floorList.forEach((o, index) => {
             indexSet.clear();
             let i = 0;
@@ -116,7 +121,7 @@ export default function initGame(config: GameConfig): Game {
                     index: i,
                     row,
                     column,
-                    top: height + (size * row - (size / 2) * index),
+                    top: height + (size * row - (size / 2) * index) - offset,
                     left: width + (size * column - (size / 2) * index),
                     parents: [],
                     state: 0,
@@ -136,6 +141,63 @@ export default function initGame(config: GameConfig): Game {
             nodes.value = nodes.value.concat(floorNodes);
             perFloorNodes = floorNodes;
         });
+
+        if (layerNum > 3) {
+            const leftTotal = Number(cardNum * 3 / 2);
+            const rightTotal = cardNum * 3 - leftTotal;
+            const topOffset = containerHeight - ((layerNum > 5) ? size : 2 * size);
+            // 生成左右两边的卡牌池
+            for (let i = 0; i < 3; i++)
+                itemList = [...itemList, ...itemTypes];
+            // 打乱节点
+            itemList = shuffle(shuffle(itemList));
+            // 生成左边部分卡牌
+            for (let j = 0; j < leftTotal; j++) {
+                const node: CardNode = {
+                    id: `left-${j}`,
+                    type: shuffleCardImgArr[itemList[j]],
+                    zIndex: j,
+                    index: j,
+                    row: j,
+                    column: 1,
+                    top: topOffset,
+                    left: j * 7,
+                    parents: [],
+                    state: 0,
+                    nodeIndex: 0,
+                };
+                leftNodes.push(node);
+            }
+            for (let j = 0; j < leftTotal; j++) {
+                for (let k = leftTotal - 1; k > j; k--) {
+                    leftNodes[j].parents.push(leftNodes[k]);
+                }
+            }
+        
+            // 生成右边部分卡牌
+            for (let k = 0; k < rightTotal; k++) {
+                const node: CardNode = {
+                    id: `right-${k}`,
+                    type: shuffleCardImgArr[itemList[leftTotal + k]],
+                    zIndex: k,
+                    index: k,
+                    row: k,
+                    column: 1,
+                    top: topOffset,
+                    left: containerWidth - k * 7,
+                    parents: [],
+                    state: 0,
+                    nodeIndex: 0,
+                };
+                rightNodes.push(node);
+            }
+            for (let j = 0; j < rightTotal; j++) {
+                for (let k = rightTotal - 1; k > j; k--) {
+                    rightNodes[j].parents.push(rightNodes[k]);
+                }
+            }
+            nodes.value = nodes.value.concat(leftNodes).concat(rightNodes);
+        }
         nodes.value.forEach((o) => {
             o.state = o.parents.every((p) => p.state > 0) ? 1 : 0;
         });

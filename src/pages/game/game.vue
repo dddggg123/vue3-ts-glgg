@@ -138,24 +138,24 @@ const state = reactive({
     ] as Array<grassObj>,
     levelConfig: [
         {
-            cardNum: 3,
+            cardNum: 4,
             layerNum: 2,
             trap: false
         }, {
-            cardNum: 5,
+            cardNum: 6,
+            layerNum: 3,
+            trap: false
+        }, {
+            cardNum: 8,
             layerNum: 4,
             trap: false
         }, {
-            cardNum: 7,
+            cardNum: 10,
             layerNum: 6,
-            trap: false
-        }, {
-            cardNum: 9,
-            layerNum: 8,
             trap: false
         }
     ],
-    currentLevel: 0,
+    currentLevel: 2,
     currentDate: '- 10月10日 -',
     storePosition: {
         left: 0,
@@ -307,7 +307,7 @@ const calcRemoveSectionPosition = () => {
     // const left = removeRef.value.getBoundingClientRect().left;
     // const left = (screenRef.value.getBoundingClientRect().width - removeRef.value.getBoundingClientRect().width) / 2;
     // const top = removeRef.value.getBoundingClientRect().top - (window.innerHeight - screenRef.value.getBoundingClientRect().height) / 2;
-    console.log(screenRef.value.getBoundingClientRect());
+    // console.log(screenRef.value.getBoundingClientRect());
     state.removePostion.top = headerSectionRef.value.getBoundingClientRect().height + cardSectionRef.value.getBoundingClientRect().height - cardWidth;
 }
 
@@ -474,7 +474,7 @@ const initGrassList = () => {
         .game-card-section {
             // height: calc(100% - 235px);
             // min-height: 640px;
-            height: 640px;
+            height: 690px;
             // position: relative;
             display: grid;
             /* 指定每一行的宽度 每个宽度中间用空格隔开 */
@@ -520,26 +520,10 @@ const initGrassList = () => {
                     }
                 }
             }
-
-            // .fade-enter-active,
-            // .fade-leave-active {
-            //     transition: all 0.5s ease-in-out;
-            // }
-
-            // .fade-ente-from,
-            // .fade-leave-to {
-            //     opacity: 0;
-            //     transform: translateY(450px);
-            // }
-
-            // .fade-enter-to,
-            // .fade-leave-from {
-            //     opacity: 1;
-            // }
         }
 
         .game-store-section {
-            height: 175px;
+            height: 125px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -551,7 +535,7 @@ const initGrassList = () => {
                 height: 50px;
                 margin-top: 10px;
                 background-color: #965a1c;
-                border: 10px #c1812f solid;
+                border: 5px #c1812f solid;
                 border-radius: 5px;
 
                 .game-store {
@@ -570,11 +554,11 @@ const initGrassList = () => {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-top: 20px;
+                margin-top: 5px;
 
                 .btn-item {
                     width: 100px;
-                    height: 50px;
+                    height: 40px;
                     border: none;
                     background-color: #22a4ff;
                     border-radius: 10px;
