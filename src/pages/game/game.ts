@@ -184,7 +184,7 @@ export default function initGame(config: GameConfig): Game {
                     row: k,
                     column: 1,
                     top: topOffset,
-                    left: containerWidth - k * 7,
+                    left: containerWidth - k * 7 - size,
                     parents: [],
                     state: 0,
                     nodeIndex: 0,
