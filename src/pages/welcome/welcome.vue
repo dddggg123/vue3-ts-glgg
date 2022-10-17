@@ -26,7 +26,7 @@
                     <p @click="startGameAction" class="btn-title flex-c">
                         <span>开始挑战</span>
                     </p>
-                    <p class="version">版本号：1.0.101601</p>
+                    <p class="version">版本号：1.0.101701</p>
                 </div>
             </div>
         </div>

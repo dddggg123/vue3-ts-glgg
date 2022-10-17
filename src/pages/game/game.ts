@@ -215,6 +215,7 @@ export default function initGame(config: GameConfig): Game {
             events.clickCallback && events.clickCallback(card);
             setTimeout(() => {
                 card.state = 2;
+                card.id = card.id + '_click';
                 // 判断是否有可以消除的节点
                 const selectedSomeNode = selectedNodes.value.filter(
                     (s) => s.type === card.type
@@ -371,7 +372,7 @@ export default function initGame(config: GameConfig): Game {
         events.removeCallback && events.removeCallback();
         setTimeout(() => {
             for (let i = 0; i < 3; i++) {
-                const node: CardNode = selectedNodes.value.shift();
+                const node: CardNode = selectedNodes.value.shift() as CardNode;
                 node.state = 3;
                 if (!node) return;
                 removeList.value.push(node);
