@@ -139,23 +139,19 @@ const state = reactive({
     levelConfig: [
         {
             cardNum: 4,
-            layerNum: 2,
-            trap: false
+            layerNum: 2
         }, {
             cardNum: 6,
-            layerNum: 3,
-            trap: false
+            layerNum: 3
         }, {
             cardNum: 8,
-            layerNum: 4,
-            trap: false
+            layerNum: 4
         }, {
             cardNum: 10,
-            layerNum: 6,
-            trap: false
+            layerNum: 6
         }
     ],
-    currentLevel: 0,
+    currentLevel: 3,
     currentDate: '- 10月10日 -',
     storePosition: {
         left: 0,

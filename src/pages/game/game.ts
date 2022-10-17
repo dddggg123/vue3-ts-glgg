@@ -28,8 +28,7 @@ const cardImgArr: Array<string> = [
 
 const defaultGameConfig: GameConfig = {
     cardNum: 4,
-    layerNum: 2,
-    trap: true,
+    layerNum: 2
 };
 
 export default function initGame(config: GameConfig): Game {
@@ -70,20 +69,16 @@ export default function initGame(config: GameConfig): Game {
         leftNodes = [];
         rightNodes = [];
         floorList = [];
-        const isTrap = trap && floor(random(0, 100)) !== 50;
         let shuffleCardImgArr = shuffle(cardImgArr);
         itemList = [];
         clickCount = 1;
 
         // 生成节点池
-        const itemTypes = new Array(cardNum).fill(0).map((_, index) => index + 1);
+        const itemTypes = [];
+        for (let i = 0; i < cardNum; i++)
+             itemTypes.push(i + 1);
         for (let i = 0; i < 3 * layerNum; i++)
             itemList = [...itemList, ...itemTypes];
-
-        if (isTrap) {
-            const len = itemList.length;
-            itemList.splice(len - cardNum, len);
-        }
 
         // 打乱节点
         itemList = shuffle(shuffle(itemList));
