@@ -55,7 +55,7 @@ export default function initGame(config: GameConfig): Game {
     let rightNodes: CardNode[] = [];
 
     const initCardList = (config?: GameConfig | null) => {
-        const { cardNum, layerNum, trap } = { ...initConfig, ...config };
+        const { cardNum, layerNum } = { ...initConfig, ...config };
         backFlag.value = false;
         removeFlag.value = false;
         shuffleFlag.value = false;
