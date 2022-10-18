@@ -21,7 +21,7 @@
                 <div v-for="(item, index) in state.grassList" :key="item.id" class="grass-item">
                     <img :src="item.url" class="grass-img">
                 </div>
-                <template v-for="(item, index) in nodes" :key="item.id">
+                <template v-for="(item, index) in cardList" :key="item.id">
                     <!-- <Card v-if="item.state === 0 || item.state === 1"
                         @cardTap="selectCardHandler" :node="item"></Card> -->
                     <Card :nodeIndex="index" v-if="item.state === 0 || item.state === 1" @cardTap="selectCardHandler"
@@ -151,7 +151,7 @@ const state = reactive({
             layerNum: 6
         }
     ],
-    currentLevel: 3,
+    currentLevel: 0,
     currentDate: '- 10月10日 -',
     storePosition: {
         left: 0,
@@ -178,15 +178,15 @@ const clickCardHandler = (card: CardNode) => {
 
 const confirmNodeStyle = (card: CardNode) => {
     // let nodeProxy = {} as any;
-    // nodesRefs.value.forEach((item: any) => {
+    // cardListRefs.value.forEach((item: any) => {
     //     if (item.id == card.id) {
     //         console.log(item.el);
     //         nodeProxy = item.el;
     //     }
     // })
-    // for (let i = 0; i < nodesRefs.value.length; i++) {
-    //     if (nodesRefs.value[i].id == card.id) {
-    //         nodeProxy = nodesRefs.value[i].el;
+    // for (let i = 0; i < cardListRefs.value.length; i++) {
+    //     if (cardListRefs.value[i].id == card.id) {
+    //         nodeProxy = cardListRefs.value[i].el;
     //         break;
     //     }
     // }
@@ -308,7 +308,7 @@ const calcRemoveSectionPosition = () => {
 }
 
 const {
-    nodes,
+    cardList,
     selectedNodes,
     removeFlag,
     removeList,

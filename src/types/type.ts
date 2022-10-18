@@ -1,7 +1,7 @@
 import { Ref, VNodeRef } from "vue";
 
 export interface Game {
-	nodes: Ref<CardNode[]>;
+	cardList: Ref<CardNode[]>;
 	selectedNodes: Ref<CardNode[]>;
 	removeList: Ref<CardNode[]>;
 	removeFlag: Ref<boolean>;
@@ -17,18 +17,18 @@ export interface Game {
 
 // 卡片节点类型
 export type CardNode = {
-	id: string; // 节点id zIndex-index
-	type: string; // 类型
-	zIndex: number; // 图层
+	id: string; // 卡片唯一id
+	type: string; // 卡片的图标类型
+	zIndex: number; // 卡片所在的图层
 	index: number; // 所在图层中的索引
-	parents: CardNode[]; // 父节点
-	row: number; // 行
-	column: number; // 列
-	top: number;
-	left: number;
-	state: number; // 卡片四种状态  0： 无状态  1： 可点击 2：已选 3：已消除
-    nodeIndex: number;
-    ref?:  undefined | HTMLElement
+	parents: CardNode[]; // 卡片的
+	row: number; // 卡片所在行
+	column: number; // 卡片所在列
+	top: number; // 卡片top距离
+	left: number; // 卡片left距离
+	state: number; // 卡片四种状态  0： 无状态  1：可点击 2：已选 3：已消除
+    nodeIndex: number; // 数组中的下表索引
+    ref?:  undefined | HTMLElement // 卡片自身的dom引用
 };
 
 export interface GameConfig {

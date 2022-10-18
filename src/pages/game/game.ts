@@ -43,7 +43,7 @@ export default function initGame(config: GameConfig): Game {
     const historyList = ref<CardNode[]>([]);
     const removeList = ref<CardNode[]>([]);
     const preNode = ref<CardNode | null>(null);
-    const nodes = ref<CardNode[]>([]);
+    const cardList = ref<CardNode[]>([]);
     const indexSet = new Set();
     let perFloorNodes: CardNode[] = [];
     const selectedNodes = ref<CardNode[]>([]);
@@ -63,7 +63,7 @@ export default function initGame(config: GameConfig): Game {
         selectedNodes.value = [];
         historyList.value = [];
         preNode.value = null;
-        nodes.value = [];
+        cardList.value = [];
         indexSet.clear();
         perFloorNodes = [];
         leftNodes = [];
@@ -133,7 +133,7 @@ export default function initGame(config: GameConfig): Game {
                 floorNodes.push(node);
                 indexSet.add(i);
             });
-            nodes.value = nodes.value.concat(floorNodes);
+            cardList.value = cardList.value.concat(floorNodes);
             perFloorNodes = floorNodes;
         });
 
@@ -191,9 +191,9 @@ export default function initGame(config: GameConfig): Game {
                     rightNodes[j].parents.push(rightNodes[k]);
                 }
             }
-            nodes.value = nodes.value.concat(leftNodes).concat(rightNodes);
+            cardList.value = cardList.value.concat(leftNodes).concat(rightNodes);
         }
-        nodes.value.forEach((o) => {
+        cardList.value.forEach((o) => {
             o.state = o.parents.every((p) => p.state > 0) ? 1 : 0;
         });
     };
@@ -266,7 +266,7 @@ export default function initGame(config: GameConfig): Game {
     const gameResultHandler = () => {
         // 判断是否已经清空节点，即是否胜利
         if (
-            nodes.value.every((o) => o.state > 0) &&
+            cardList.value.every((o) => o.state > 0) &&
             removeList.value.length === 0 &&
             selectedNodes.value.length === 0
         ) {
@@ -300,11 +300,11 @@ export default function initGame(config: GameConfig): Game {
         const containerHeight = container!.value!.clientHeight;
         const width = containerWidth / 2;
         const height = containerHeight / 2;
-        let nodesArr: Array<CardNode> = cloneDeep(nodes.value);
+        let nodesArr: Array<CardNode> = cloneDeep(cardList.value);
         // console.log('图片类型:' + JSON.stringify(typeArr));
         let nodeItem: CardNode;
         let nodeItemArr: Array<CardNode> = [];
-        nodes.value = [];
+        cardList.value = [];
         floorList.forEach((o, index) => {
             indexSet.clear();
             let i = 0;
@@ -356,8 +356,8 @@ export default function initGame(config: GameConfig): Game {
             nodeItemArr = nodeItemArr.concat(floorNodes);
             perFloorNodes = floorNodes;
         });
-        nodes.value = [...nodeItemArr];
-        nodes.value.forEach((o) => {
+        cardList.value = [...nodeItemArr];
+        cardList.value.forEach((o) => {
             if (o.state !== 2) {
                 o.state = o.parents.every((p) => p.state > 0) ? 1 : 0;
             }
@@ -395,8 +395,8 @@ export default function initGame(config: GameConfig): Game {
         setTimeout(() => {
             // const card = selectedNodes.value[selectedNodes.value.length - 1];
             node.state = 1;
-            const index = nodes.value.findIndex((o) => o.id === node.id);
-            nodes.value[index] = node;
+            const index = cardList.value.findIndex((o) => o.id === node.id);
+            cardList.value[index] = node;
             const index1 = selectedNodes.value.findIndex((o) => o.id === node.id);
             selectedNodes.value.splice(index1, 1);
             preNode.value = null;
@@ -405,7 +405,7 @@ export default function initGame(config: GameConfig): Game {
     };
 
     return {
-        nodes,
+        cardList,
         selectedNodes,
         removeFlag,
         removeList,
