@@ -24,11 +24,11 @@
                 <template v-for="(item, index) in cardList" :key="item.id">
                     <!-- <Card v-if="item.state === 0 || item.state === 1"
                         @cardTap="selectCardHandler" :node="item"></Card> -->
-                    <Card :nodeIndex="index" v-if="item.state === 0 || item.state === 1" @cardTap="selectCardHandler"
+                    <Card v-if="item.state === 0 || item.state === 1" @cardTap="selectCardHandler"
                         :node="item"></Card>
                 </template>
                 <template v-for="(item, index) in removeList" :key="item.id">
-                    <CardRemove v-if="item.state === 3" :nodeIndex="index" :removeIndex="index"
+                    <CardRemove v-if="item.state === 3" :removeIndex="index"
                         :position="state.removePostion" :node="item" @cardRemoveTap="selectRemoveCardHandler">
                     </CardRemove>
                 </template>
@@ -38,7 +38,7 @@
                     <div ref="storeRef" class="game-store flex-l">
                         <template v-if="selectedNodes.length">
                             <template v-for="(item, index) in selectedNodes" :key="item.id">
-                                <CardStore v-if="item.state === 2" :storeIndex="index" :nodeIndex="index"
+                                <CardStore v-if="item.state === 2" :storeIndex="index"
                                     :position="state.storePosition" :node="item"></CardStore>
                             </template>
                         </template>

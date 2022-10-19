@@ -4,7 +4,7 @@
         @click="cardTapAction">
         <div class="card-section">
             <div class="card-content flex-c">
-                <img class="card-img" :src="imgMapObj[node.type]" :alt="`${node.type}`">
+                <img class="card-img" :src="node.imgUrl" :alt="`${node.type}`">
                 <!-- <img :src="'./../../assets/icons/caomei.png'"/> -->
             </div>
             <div v-if="isForbid && !isDock" class="card-mask"></div>
@@ -25,26 +25,13 @@ type positionObj = {
 interface Props {
     node: CardNode
     isDock?: boolean,
-    nodeIndex: number,
     position: positionObj,
     removeIndex: number
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(['cardRemoveTap']);
-
-const { node, nodeIndex } = props;
-
-// 加载图片资源
-const modulesFiles = import.meta.globEager('../../assets/icons/*.png');
-
-const imgMapObj = Object.keys(modulesFiles).reduce(
-    (module: { [key: string]: any }, path: string) => {
-        const moduleName = path.replace('../../assets/icons/', '').replace('.png', '');
-        module[moduleName] = modulesFiles[path].default;
-        return module
-    }, {} as Record<string, string>
-)
+const { node } = props;
 
 const isForbid = computed(() => {
     return props.node.parents.length > 0 ? props.node.parents.some(o => o.state < 2) : false

@@ -19,6 +19,7 @@ export interface Game {
 export type CardNode = {
 	id: string; // 卡片唯一id
 	type: string; // 卡片的图标类型
+    imgUrl: string; // 卡片的图标路径
 	zIndex: number; // 卡片所在的图层
 	index: number; // 所在图层中的索引
 	parents: CardNode[]; // 卡片的
@@ -27,7 +28,6 @@ export type CardNode = {
 	top: number; // 卡片top距离
 	left: number; // 卡片left距离
 	state: number; // 卡片四种状态  0： 无状态  1：可点击 2：已选 3：已消除
-    nodeIndex: number; // 数组中的下表索引
     ref?:  undefined | HTMLElement // 卡片自身的dom引用
 };
 
