@@ -104,6 +104,7 @@ export default function initGame(config: GameConfig): Game {
 			len += floorNum;
 			floorIndex++;
 		}
+
 		const containerWidth = container!.value!.clientWidth;
 		const containerHeight = container!.value!.clientHeight;
 		const width = containerWidth / 2;
@@ -212,7 +213,6 @@ export default function initGame(config: GameConfig): Game {
 	 * card点击事件
 	 */
 	const selectCardHandler = (card: CardNode) => {
-		// console.log('我点击的节点:' + JSON.stringify(card));
 		if (selectedNodes.value.length === 7) {
 			return;
 		}
@@ -311,7 +311,6 @@ export default function initGame(config: GameConfig): Game {
 		const width = containerWidth / 2;
 		const height = containerHeight / 2;
 		let nodesArr: Array<CardNode> = cloneDeep(cardList.value);
-		// console.log('图片类型:' + JSON.stringify(typeArr));
 		let nodeItem: CardNode;
 		let nodeItemArr: Array<CardNode> = [];
 		cardList.value = [];
@@ -392,7 +391,6 @@ export default function initGame(config: GameConfig): Game {
 			} else {
 				preNode.value = null;
 			}
-			console.log(preNode.value);
 		}, 210);
 	};
 	/**
