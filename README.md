@@ -11,7 +11,7 @@
 
 ### 源码地址
 - gitee地址：[项目链接](https://gitee.com/xiaoxiang_reincarnation/vue3-ts-glgg.git)
-- github下载地址：[项目链接](https://github.com/dddggg123/vue3-ts-glgg.git)
+- github地址：[项目链接](https://github.com/dddggg123/vue3-ts-glgg.git)
 - 移动端地址：[项目链接](https://gitee.com/xiaoxiang_reincarnation/vue3-ts-glgg-mobile.git)
 
 ### 相关技术栈
