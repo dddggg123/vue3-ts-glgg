@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import type { CardNode, GameConfig, Game } from "../../types/type";
-import { ceil, floor, random, shuffle, cloneDeep, throttle } from "lodash-es";
+import { ceil, floor, random, shuffle, cloneDeep } from "lodash-es";
 
 const cardImgArr: Array<string> = [
 	"boluo",
@@ -55,8 +55,6 @@ export default function initGame(config: GameConfig): Game {
 	let rightNodes: CardNode[] = [];
 	// 加载图片资源
 	const modulesFiles = import.meta.globEager("../../assets/icons/*.png");
-	console.log(modulesFiles);
-
 	const imgMapObj = Object.keys(modulesFiles).reduce(
 		(module: { [key: string]: any }, path: string) => {
 			const moduleName = path
@@ -67,8 +65,6 @@ export default function initGame(config: GameConfig): Game {
 		},
 		{} as Record<string, string>
 	);
-
-    console.log(typeof(imgMapObj['lizi']));
 
 	const initCardList = (config?: GameConfig | null) => {
 		const { cardNum, layerNum } = { ...initConfig, ...config };
