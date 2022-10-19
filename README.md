@@ -9,11 +9,31 @@
 ### 项目预览
 - 在线预览地址：https://glgg.xkxk.tech
 
-### 源码下载
-- gitee下载地址：[项目链接](https://gitee.com/xiaoxiang_reincarnation/vue3-ts-glgg.git)
+### 源码地址
+- gitee地址：[项目链接](https://gitee.com/xiaoxiang_reincarnation/vue3-ts-glgg.git)
+- github下载地址：[项目链接](https://github.com/dddggg123/vue3-ts-glgg.git)
+- 移动端地址：[项目链接](https://gitee.com/xiaoxiang_reincarnation/vue3-ts-glgg-mobile.git)
 
 ### 相关技术栈
 - Vue3、TypeScript、Vite、canvas-confetti
+
+### 使用说明
+```
+# 克隆项目
+git clone https://gitee.com/xiaoxiang_reincarnation/vue3-ts-glgg.git
+
+# 进入项目
+cd vue3-ts-glgg
+
+# 安装依赖
+npm install
+
+# 运行项目
+npm run dev
+
+# 打包发布
+npm run build
+```
 
 ### 联系作者
 - 使用中遇到不懂的问题或者有更好的建议欢迎添加作者微信
